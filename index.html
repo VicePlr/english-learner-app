@@ -117,7 +117,7 @@
         <div class="card">
             <div id="phrase-box" class="phrase-box">
                 <p id="phrase-text" class="text-xl md:text-2xl font-semibold text-gray-800">Hello, how's it going?</p>
-                <button id="speak-button" class="speak-button" aria-label="Listen to phrase">
+                <button id="speak-button" class="speak-button" aria-label="Listen to phrase" tabindex="-1">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.121-7.072a8 8 0 010 11.314m-7.072-11.314a2 2 0 010 2.828m-2.122-2.828a5 5 0 010 7.072m2.121-7.072a8 8 0 010 11.314" />
                     </svg>
@@ -170,9 +170,9 @@
         import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, setDoc, doc, getDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Global variables provided by the Canvas environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'default-app-id';
+        const firebaseConfig = typeof window.__firebase_config !== 'undefined' ? JSON.parse(window.__firebase_config) : {};
+        const initialAuthToken = typeof window.__initial_auth_token !== 'undefined' ? window.__initial_auth_token : null;
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -354,7 +354,7 @@
                 }
 
                 const sharedWords = sharedDoc.data().words;
-                if (sharedWords.length === 0) {
+                if (!sharedWords || sharedWords.length === 0) {
                     shareIdDisplay.textContent = "This list is empty.";
                     return;
                 }
@@ -404,15 +404,20 @@
             responseBox.style.display = 'none';
         }
         function speakPhrase(text) {
+            // Prevent multiple overlapping utterances
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+            }
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'en-US';
-            speechSynthesis.speak(utterance);
+            window.speechSynthesis.speak(utterance);
         }
         phraseBox.addEventListener('click', (event) => {
+            // Only toggle if not clicking the speak button
             if (event.target.closest('#speak-button')) {
                 return;
             }
-            if (responseBox.style.display === 'none') {
+            if (responseBox.style.display === 'none' || responseBox.style.display === '') {
                 responseBox.style.display = 'block';
                 setTimeout(() => { responseBox.style.opacity = '1'; }, 10);
             } else {
@@ -428,7 +433,8 @@
             isRolesSwitched = !isRolesSwitched;
             updatePhrase();
         });
-        speakButton.addEventListener('click', () => {
+        speakButton.addEventListener('click', (e) => {
+            e.stopPropagation();
             speakPhrase(phraseText.textContent);
         });
         updatePhrase();
