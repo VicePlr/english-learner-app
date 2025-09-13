@@ -272,18 +272,7 @@
     const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
     const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    // --- App Version ---
-    const APP_VERSION = '1.3.1';
-    document.getElementById('app-version').textContent = APP_VERSION;
-
-    // --- Core App Logic ---
-    
-    // State variables
+    let app, auth, db;
     let userId = null;
     let userData = {
         streak: 0,
@@ -292,79 +281,313 @@
     let currentDifficulty = 'beginner';
     let currentQuestion = null;
     let currentWord = '';
-    let currentReadingQuestions = [];
     const wordList = ["apple", "banana", "orange", "grape", "strawberry", "pineapple", "blueberry", "kiwi", "keyboard", "computer", "mountain", "ocean", "bicycle", "building", "guitar"];
 
-    // UI Elements
-    const tabButtons = document.querySelectorAll('.tab-button');
-    const tabContents = document.querySelectorAll('.tab-content');
-    const recordBtn = document.getElementById('record-btn');
-    const recordText = document.getElementById('record-text');
-    const pronunciationFeedback = document.getElementById('pronunciation-feedback');
-    const resultText = document.getElementById('result-text');
-    const suggestionText = document.getElementById('suggestion-text');
-    const browserWarning = document.getElementById('browser-warning');
-    const checkWordBtn = document.getElementById('check-word-btn');
-    const playAudioBtn = document.getElementById('play-audio-btn');
-    const practicePhraseInput = document.getElementById('practice-phrase');
-    const waveformContainer = document.getElementById('waveform-container');
-    const generatePhraseBtn = document.getElementById('generate-phrase-btn');
+    let tabButtons, tabContents, recordBtn, recordText, pronunciationFeedback, resultText, suggestionText, browserWarning, checkWordBtn, playAudioBtn, practicePhraseInput, waveformContainer, generatePhraseBtn, grammarQuestionEl, grammarOptionsEl, grammarFeedbackEl, difficultyButtons, difficultyNotes, grammarAudioBtn, generateNewBtn, scrambledWordEl, wordGuessEl, wordRushFeedbackEl, wordRushMessageEl, streakCounter, generateReadingBtn, readingTitleEl, readingPassageEl, questionsContainerEl, currentReadingQuestions;
 
-    const grammarQuestionEl = document.getElementById('grammar-question');
-    const grammarOptionsEl = document.getElementById('grammar-options');
-    const grammarFeedbackEl = document.getElementById('grammar-feedback');
-    const difficultyButtons = document.querySelectorAll('.difficulty-button');
-    const difficultyNotes = document.querySelectorAll('.difficulty-note');
-    const grammarAudioBtn = document.getElementById('grammar-audio-btn');
-    const generateNewBtn = document.getElementById('generate-new-btn');
-    const scrambledWordEl = document.getElementById('scrambled-word');
-    const wordGuessEl = document.getElementById('word-guess');
-    const wordRushFeedbackEl = document.getElementById('word-rush-feedback');
-    const wordRushMessageEl = document.getElementById('word-rush-message');
+    window.onload = async () => {
+        // Initialize Firebase
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        
+        // UI Elements
+        tabButtons = document.querySelectorAll('.tab-button');
+        tabContents = document.querySelectorAll('.tab-content');
+        recordBtn = document.getElementById('record-btn');
+        recordText = document.getElementById('record-text');
+        pronunciationFeedback = document.getElementById('pronunciation-feedback');
+        resultText = document.getElementById('result-text');
+        suggestionText = document.getElementById('suggestion-text');
+        browserWarning = document.getElementById('browser-warning');
+        checkWordBtn = document.getElementById('check-word-btn');
+        playAudioBtn = document.getElementById('play-audio-btn');
+        practicePhraseInput = document.getElementById('practice-phrase');
+        waveformContainer = document.getElementById('waveform-container');
+        generatePhraseBtn = document.getElementById('generate-phrase-btn');
 
-    const streakCounter = document.getElementById('streak-counter');
-    
-    // Reading section elements
-    const generateReadingBtn = document.getElementById('generate-reading-btn');
-    const readingTitleEl = document.getElementById('reading-title');
-    const readingPassageEl = document.getElementById('reading-passage');
-    const questionsContainerEl = document.getElementById('questions-container');
+        grammarQuestionEl = document.getElementById('grammar-question');
+        grammarOptionsEl = document.getElementById('grammar-options');
+        grammarFeedbackEl = document.getElementById('grammar-feedback');
+        difficultyButtons = document.querySelectorAll('.difficulty-button');
+        difficultyNotes = document.querySelectorAll('.difficulty-note');
+        grammarAudioBtn = document.getElementById('grammar-audio-btn');
+        generateNewBtn = document.getElementById('generate-new-btn');
+        scrambledWordEl = document.getElementById('scrambled-word');
+        wordGuessEl = document.getElementById('word-guess');
+        wordRushFeedbackEl = document.getElementById('word-rush-feedback');
+        wordRushMessageEl = document.getElementById('word-rush-message');
 
-    // --- Firebase Auth & Data Management ---
+        streakCounter = document.getElementById('streak-counter');
+        
+        generateReadingBtn = document.getElementById('generate-reading-btn');
+        readingTitleEl = document.getElementById('reading-title');
+        readingPassageEl = document.getElementById('reading-passage');
+        questionsContainerEl = document.getElementById('questions-container');
 
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            userId = user.uid;
-            const userDocRef = doc(db, 'artifacts', appId, 'users', userId, 'userData', 'userProgress');
+        // Initial App setup after DOM is loaded
+        const APP_VERSION = '1.3.1';
+        document.getElementById('app-version').textContent = APP_VERSION;
 
-            const unsubscribe = onSnapshot(userDocRef, (doc) => {
-                if (doc.exists()) {
-                    userData = doc.data();
-                }
-                updateDashboardUI();
-            }, (error) => {
-                console.error("Error listening to Firestore updates:", error);
-            });
+        // --- Firebase Auth & Data Management ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                const userDocRef = doc(db, 'artifacts', appId, 'users', userId, 'userData', 'userProgress');
 
-            // Clean up listener on window unload
-            window.addEventListener('beforeunload', () => unsubscribe());
-        } else {
-            // Sign in anonymously
-            if (initialAuthToken) {
-                try {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } catch (error) {
-                    console.error("Custom token sign-in failed. Signing in anonymously...", error);
+                const unsubscribe = onSnapshot(userDocRef, (doc) => {
+                    if (doc.exists()) {
+                        userData = doc.data();
+                    }
+                    updateDashboardUI();
+                }, (error) => {
+                    console.error("Error listening to Firestore updates:", error);
+                });
+
+                window.addEventListener('beforeunload', () => unsubscribe());
+            } else {
+                if (initialAuthToken) {
+                    try {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } catch (error) {
+                        console.error("Custom token sign-in failed. Signing in anonymously...", error);
+                        await signInAnonymously(auth);
+                    }
+                } else {
                     await signInAnonymously(auth);
                 }
-            } else {
-                await signInAnonymously(auth);
             }
-        }
-    });
+        });
 
+        // Add event listeners
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetTab = button.dataset.tab;
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('active', 'bg-indigo-600', 'text-white');
+                    btn.classList.add('text-gray-700', 'hover:text-indigo-600');
+                });
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                });
+                button.classList.add('active', 'bg-indigo-600', 'text-white');
+                button.classList.remove('text-gray-700', 'hover:text-indigo-600');
+                document.getElementById(targetTab).classList.add('active');
+
+                if (targetTab === 'grammar') {
+                    loadGrammarQuestion();
+                } else if (targetTab === 'word-rush') {
+                    loadWordRushGame();
+                } else if (targetTab === 'reading') {
+                    loadReadingMaterial();
+                }
+            });
+        });
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+        const synthesis = window.speechSynthesis;
+
+        if (recognition && synthesis) {
+            recognition.continuous = false;
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            generatePhraseBtn.addEventListener('click', generateNewPhrase);
+
+            playAudioBtn.addEventListener('click', () => {
+                const textToSpeak = practicePhraseInput.value;
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                utterance.lang = 'en-US';
+                synthesis.speak(utterance);
+            });
+
+            recordBtn.addEventListener('click', () => {
+                if (recordText.textContent === 'Record My Voice') {
+                    recordText.textContent = 'Listening...';
+                    recordBtn.classList.remove('bg-red-500');
+                    recordBtn.classList.add('bg-blue-500');
+                    resultText.textContent = 'Listening...';
+                    suggestionText.textContent = '';
+                    waveformContainer.classList.remove('hidden');
+                    recognition.start();
+                } else {
+                    recordText.textContent = 'Record My Voice';
+                    recordBtn.classList.remove('bg-blue-500');
+                    recordBtn.classList.add('bg-red-500');
+                    waveformContainer.classList.add('hidden');
+                    recognition.stop();
+                }
+            });
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript.toLowerCase();
+                const targetPhrase = practicePhraseInput.value.toLowerCase();
+                
+                const { score, feedback, suggestion } = analyzePronunciation(transcript, targetPhrase);
+                
+                resultText.innerHTML = feedback;
+                suggestionText.textContent = suggestion;
+
+                if (score > 80) {
+                    resultText.innerHTML += ` Your score is ${score}%. Great job! Your pronunciation is clear and accurate.`;
+                    updateProgress();
+                } else if (score > 50) {
+                    resultText.innerHTML += ` Your score is ${score}%. Good attempt! Practice a little more to improve clarity.`;
+                } else {
+                    resultText.innerHTML += ` Your score is ${score}%. Keep trying! Your pronunciation needs more work.`;
+                }
+                
+                recordText.textContent = 'Record My Voice';
+                recordBtn.classList.remove('bg-blue-500');
+                recordBtn.classList.add('bg-red-500');
+                waveformContainer.classList.add('hidden');
+            };
+
+            recognition.onerror = (event) => {
+                resultText.textContent = `Error occurred in speech recognition: ${event.error}`;
+                suggestionText.textContent = '';
+                recordText.textContent = 'Record My Voice';
+                recordBtn.classList.remove('bg-blue-500');
+                recordBtn.classList.add('bg-red-500');
+                waveformContainer.classList.add('hidden');
+            };
+            
+            pronunciationFeedback.addEventListener('click', (event) => {
+                const clickedWordSpan = event.target.closest('.clickable-word');
+                if (clickedWordSpan) {
+                    const wordToSpeak = clickedWordSpan.dataset.word;
+                    if (wordToSpeak) {
+                        const utterance = new SpeechSynthesisUtterance(wordToSpeak);
+                        utterance.lang = 'en-US';
+                        synthesis.speak(utterance);
+                    }
+                }
+            });
+            
+            async function generateNewPhrase() {
+                generatePhraseBtn.disabled = true;
+                const originalText = generatePhraseBtn.innerHTML;
+                generatePhraseBtn.innerHTML = `
+                    <svg class="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Generating...</span>
+                `;
+                
+                const userQuery = "Generate a single, short, grammatically correct English phrase for a learner to practice pronunciation. The phrase should be natural-sounding and not a common idiom. Return only the phrase itself.";
+                
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                };
+                
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                let retries = 0;
+                const maxRetries = 3;
+                let delay = 1000;
+
+                while (retries < maxRetries) {
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                             if (response.status === 429) {
+                                throw new Error('Rate limit exceeded');
+                             }
+                            throw new Error('Network response was not ok');
+                        }
+
+                        const result = await response.json();
+                        const generatedText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                        
+                        if (generatedText) {
+                            practicePhraseInput.value = generatedText.trim();
+                            resultText.textContent = "New phrase generated! Press 'Play Audio' to listen or 'Record My Voice' to practice.";
+                            suggestionText.textContent = '';
+                            break;
+                        }
+
+                    } catch (error) {
+                        retries++;
+                        if (retries < maxRetries) {
+                            await new Promise(res => setTimeout(res, delay));
+                            delay *= 2;
+                        } else {
+                            resultText.textContent = `Failed to generate a new phrase: ${error.message}`;
+                            suggestionText.textContent = '';
+                        }
+                    }
+                }
+                
+                generatePhraseBtn.disabled = false;
+                generatePhraseBtn.innerHTML = originalText;
+            }
+
+        } else {
+            recordBtn.disabled = true;
+            recordBtn.textContent = 'Not Supported';
+            playAudioBtn.disabled = true;
+            playAudioBtn.textContent = 'Not Supported';
+            generatePhraseBtn.disabled = true;
+            generatePhraseBtn.textContent = 'Not Supported';
+            browserWarning.classList.remove('hidden');
+        }
+
+        difficultyButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                currentDifficulty = button.dataset.difficulty;
+                difficultyButtons.forEach(btn => {
+                    btn.classList.remove('active', 'bg-indigo-600', 'text-white');
+                    btn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                });
+                button.classList.add('active', 'bg-indigo-600', 'text-white');
+                
+                difficultyNotes.forEach(note => {
+                    note.classList.add('hidden');
+                    note.classList.remove('active');
+                });
+                document.querySelector(`[data-difficulty-note="${currentDifficulty}"]`).classList.remove('hidden');
+                document.querySelector(`[data-difficulty-note="${currentDifficulty}"]`).classList.add('active');
+                
+                loadGrammarQuestion();
+            });
+        });
+
+        generateNewBtn.addEventListener('click', loadGrammarQuestion);
+        grammarAudioBtn.addEventListener('click', () => {
+            if (currentQuestion && currentQuestion.question) {
+                const utterance = new SpeechSynthesisUtterance(currentQuestion.question.replace(/[_]/g, ' '));
+                utterance.lang = 'en-US';
+                synthesis.speak(utterance);
+            }
+        });
+        
+        generateReadingBtn.addEventListener('click', loadReadingMaterial);
+        checkWordBtn.addEventListener('click', () => {
+            const guess = wordGuessEl.value.toLowerCase().trim();
+            if (guess === currentWord) {
+                wordRushMessageEl.textContent = `Correct! You unscrambled "${currentWord}".`;
+                updateProgress(10);
+                setTimeout(loadWordRushGame, 2000);
+            } else {
+                wordRushMessageEl.textContent = `Incorrect. Keep trying!`;
+            }
+        });
+    }
+
+    // --- Core App Logic Functions ---
     function updateDashboardUI() {
-        streakCounter.textContent = userData.streak;
+        if (streakCounter) {
+            streakCounter.textContent = userData.streak;
+        }
     }
 
     async function updateProgress(points = 10) {
@@ -392,232 +615,40 @@
             console.error("Error updating progress: ", e);
         }
     }
-
-    // --- Tab Switching Logic ---
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const targetTab = button.dataset.tab;
-
-            // Deactivate all buttons and content
-            tabButtons.forEach(btn => {
-                btn.classList.remove('active', 'bg-indigo-600', 'text-white');
-                btn.classList.add('text-gray-700', 'hover:text-indigo-600');
-            });
-            tabContents.forEach(content => {
-                content.classList.remove('active');
-            });
-
-            // Activate the selected button and content
-            button.classList.add('active', 'bg-indigo-600', 'text-white');
-            button.classList.remove('text-gray-700', 'hover:text-indigo-600');
-            document.getElementById(targetTab).classList.add('active');
-
-            // Load content for the active tab if needed
-            if (targetTab === 'grammar') {
-                loadGrammarQuestion();
-            } else if (targetTab === 'word-rush') {
-                loadWordRushGame();
-            } else if (targetTab === 'reading') {
-                loadReadingMaterial();
-            }
-        });
-    });
-
-    // --- Pronunciation Section Logic ---
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = SpeechRecognition ? new SpeechRecognition() : null;
-    const synthesis = window.speechSynthesis;
-
-    if (recognition && synthesis) {
-        recognition.continuous = false;
-        recognition.lang = 'en-US';
-        recognition.interimResults = false;
-        recognition.maxAlternatives = 1;
-
-        generatePhraseBtn.addEventListener('click', generateNewPhrase);
-
-        playAudioBtn.addEventListener('click', () => {
-            const textToSpeak = practicePhraseInput.value;
-            const utterance = new SpeechSynthesisUtterance(textToSpeak);
-            utterance.lang = 'en-US';
-            synthesis.speak(utterance);
-        });
-
-        recordBtn.addEventListener('click', () => {
-            if (recordText.textContent === 'Record My Voice') {
-                recordText.textContent = 'Listening...';
-                recordBtn.classList.remove('bg-red-500');
-                recordBtn.classList.add('bg-blue-500');
-                resultText.textContent = 'Listening...';
-                suggestionText.textContent = '';
-                waveformContainer.classList.remove('hidden');
-                recognition.start();
-            } else {
-                recordText.textContent = 'Record My Voice';
-                recordBtn.classList.remove('bg-blue-500');
-                recordBtn.classList.add('bg-red-500');
-                waveformContainer.classList.add('hidden');
-                recognition.stop();
-            }
-        });
-
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript.toLowerCase();
-            const targetPhrase = practicePhraseInput.value.toLowerCase();
-            
-            const { score, feedback, suggestion } = analyzePronunciation(transcript, targetPhrase);
-            
-            resultText.innerHTML = feedback;
-            suggestionText.textContent = suggestion;
-
-            if (score > 80) {
-                resultText.innerHTML += ` Your score is ${score}%. Great job! Your pronunciation is clear and accurate.`;
-                updateProgress();
-            } else if (score > 50) {
-                resultText.innerHTML += ` Your score is ${score}%. Good attempt! Practice a little more to improve clarity.`;
-            } else {
-                resultText.innerHTML += ` Your score is ${score}%. Keep trying! Your pronunciation needs more work.`;
-            }
-            
-            recordText.textContent = 'Record My Voice';
-            recordBtn.classList.remove('bg-blue-500');
-            recordBtn.classList.add('bg-red-500');
-            waveformContainer.classList.add('hidden');
-        };
-
-        recognition.onerror = (event) => {
-            resultText.textContent = `Error occurred in speech recognition: ${event.error}`;
-            suggestionText.textContent = '';
-            recordText.textContent = 'Record My Voice';
-            recordBtn.classList.remove('bg-blue-500');
-            recordBtn.classList.add('bg-red-500');
-            waveformContainer.classList.add('hidden');
-        };
+    
+    function analyzePronunciation(transcript, targetPhrase) {
+        const transcriptWords = transcript.split(/\s+/).filter(word => word);
+        const targetWords = targetPhrase.split(/\s+/).filter(word => word);
         
-        // New event listener for clicking words to hear audio
-        pronunciationFeedback.addEventListener('click', (event) => {
-            const clickedWordSpan = event.target.closest('.clickable-word');
-            if (clickedWordSpan) {
-                const wordToSpeak = clickedWordSpan.dataset.word;
-                if (wordToSpeak) {
-                    const utterance = new SpeechSynthesisUtterance(wordToSpeak);
-                    utterance.lang = 'en-US';
-                    synthesis.speak(utterance);
+        let correctCount = 0;
+        let feedbackHtml = `You said: "`;
+        let suggestionText = '';
+        let isMispronounced = false;
+
+        for (let i = 0; i < targetWords.length; i++) {
+            const targetWord = targetWords[i];
+            const spokenWord = transcriptWords[i] || '';
+            
+            if (spokenWord === targetWord) {
+                feedbackHtml += `<span class="clickable-word" data-word="${targetWord}">${spokenWord}</span> `;
+                correctCount++;
+            } else {
+                feedbackHtml += `<span class="highlight clickable-word" data-word="${targetWord}">${spokenWord || '...'}</span> `;
+                if (!isMispronounced) {
+                    suggestionText = `Suggestion: It seems you had trouble with "${targetWord}". Try to enunciate the word clearly.`;
+                    isMispronounced = true;
                 }
             }
-        });
-
-        function analyzePronunciation(transcript, targetPhrase) {
-            const transcriptWords = transcript.split(/\s+/).filter(word => word);
-            const targetWords = targetPhrase.split(/\s+/).filter(word => word);
-            
-            let correctCount = 0;
-            let feedbackHtml = `You said: "`;
-            let suggestionText = '';
-            let isMispronounced = false;
-
-            for (let i = 0; i < targetWords.length; i++) {
-                const targetWord = targetWords[i];
-                const spokenWord = transcriptWords[i] || '';
-                
-                if (spokenWord === targetWord) {
-                    feedbackHtml += `<span class="clickable-word" data-word="${targetWord}">${spokenWord}</span> `;
-                    correctCount++;
-                } else {
-                    feedbackHtml += `<span class="highlight clickable-word" data-word="${targetWord}">${spokenWord || '...'}</span> `;
-                    if (!isMispronounced) {
-                        suggestionText = `Suggestion: It seems you had trouble with "${targetWord}". Try to enunciate the word clearly.`;
-                        isMispronounced = true;
-                    }
-                }
-            }
-            
-            feedbackHtml += `"`;
-
-            const similarity = correctCount / targetWords.length;
-            const score = Math.floor(similarity * 100);
-
-            return { score, feedback: feedbackHtml, suggestion: suggestionText };
         }
+        
+        feedbackHtml += `"`;
 
-        async function generateNewPhrase() {
-            generatePhraseBtn.disabled = true;
-            const originalText = generatePhraseBtn.textContent;
-            generatePhraseBtn.innerHTML = `
-                <svg class="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>Generating...</span>
-            `;
-            
-            const userQuery = "Generate a single, short, grammatically correct English phrase for a learner to practice pronunciation. The phrase should be natural-sounding and not a common idiom. Return only the phrase itself.";
-            
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-            };
-            
-            const apiKey = "";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        const similarity = correctCount / targetWords.length;
+        const score = Math.floor(similarity * 100);
 
-            let retries = 0;
-            const maxRetries = 3;
-            let delay = 1000;
-
-            while (retries < maxRetries) {
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (!response.ok) {
-                         if (response.status === 429) {
-                            throw new Error('Rate limit exceeded');
-                         }
-                        throw new Error('Network response was not ok');
-                    }
-
-                    const result = await response.json();
-                    const generatedText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-                    
-                    if (generatedText) {
-                        practicePhraseInput.value = generatedText.trim();
-                        resultText.textContent = "New phrase generated! Press 'Play Audio' to listen or 'Record My Voice' to practice.";
-                        suggestionText.textContent = '';
-                        break; // Exit the loop on success
-                    }
-
-                } catch (error) {
-                    retries++;
-                    if (retries < maxRetries) {
-                        await new Promise(res => setTimeout(res, delay));
-                        delay *= 2; // Exponential backoff
-                    } else {
-                        resultText.textContent = `Failed to generate a new phrase: ${error.message}`;
-                        suggestionText.textContent = '';
-                    }
-                }
-            }
-            
-            generatePhraseBtn.disabled = false;
-            generatePhraseBtn.innerHTML = originalText;
-        }
-
-    } else {
-        // If API is not supported
-        recordBtn.disabled = true;
-        recordBtn.textContent = 'Not Supported';
-        playAudioBtn.disabled = true;
-        playAudioBtn.textContent = 'Not Supported';
-        generatePhraseBtn.disabled = true;
-        generatePhraseBtn.textContent = 'Not Supported';
-        browserWarning.classList.remove('hidden');
+        return { score, feedback: feedbackHtml, suggestion: suggestionText };
     }
 
-    // --- Grammar Section Logic ---
-    
     async function getNewGrammarQuestion(difficulty) {
         const prompt = `Generate a JSON object for a grammar drill question at a "${difficulty}" difficulty level.
         The question should test a specific grammar rule in a contextual sentence, not just a single word.
@@ -721,40 +752,7 @@
             grammarFeedbackEl.textContent = `Incorrect. The correct answer is "${currentQuestion.answer}". ` + currentQuestion.explanation;
         }
     }
-
-    difficultyButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            currentDifficulty = button.dataset.difficulty;
-            difficultyButtons.forEach(btn => {
-                btn.classList.remove('active', 'bg-indigo-600', 'text-white');
-                btn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
-            });
-            button.classList.add('active', 'bg-indigo-600', 'text-white');
-            
-            difficultyNotes.forEach(note => {
-                note.classList.add('hidden');
-                note.classList.remove('active');
-            });
-            document.querySelector(`[data-difficulty-note="${currentDifficulty}"]`).classList.remove('hidden');
-            document.querySelector(`[data-difficulty-note="${currentDifficulty}"]`).classList.add('active');
-            
-            loadGrammarQuestion();
-        });
-    });
-
-    generateNewBtn.addEventListener('click', loadGrammarQuestion);
-
-    grammarAudioBtn.addEventListener('click', () => {
-        if (currentQuestion && currentQuestion.question) {
-            const utterance = new SpeechSynthesisUtterance(currentQuestion.question.replace(/[_]/g, ' '));
-            utterance.lang = 'en-US';
-            synthesis.speak(utterance);
-        }
-    });
-
-    // --- Reading Section Logic ---
-    generateReadingBtn.addEventListener('click', loadReadingMaterial);
-
+    
     async function getReadingMaterial() {
         const prompt = `Generate a JSON object for an English reading comprehension exercise. The passage should be around 150-200 words on an interesting topic, like nature, science, or history. The object should include a title, the full passage, and an array of exactly 10 multiple-choice questions. Each question object must have a 'text' field, an array of four 'options', and a 'correctAnswer' field. Additionally, each question should have a 'difficulty' field set to either 'easy', 'medium', or 'hard'.
         Example JSON format:
@@ -909,7 +907,6 @@
             feedbackEl.classList.add('text-red-600');
         }
 
-        // Disable all options for this question
         Array.from(optionsContainer.children).forEach(optionBtn => {
             optionBtn.disabled = true;
             if (optionBtn.dataset.option === question.correctAnswer) {
@@ -922,7 +919,6 @@
         });
     }
 
-    // --- Word Rush Logic ---
     function scrambleWord(word) {
         let a = word.split("");
         for (let i = a.length - 1; i > 0; i--) {
@@ -939,22 +935,6 @@
         scrambledWordEl.textContent = scrambled;
         wordGuessEl.value = '';
         wordRushMessageEl.textContent = 'Type your guess and click "Check Answer".';
-    }
-
-    checkWordBtn.addEventListener('click', () => {
-        const guess = wordGuessEl.value.toLowerCase().trim();
-        if (guess === currentWord) {
-            wordRushMessageEl.textContent = `Correct! You unscrambled "${currentWord}".`;
-            updateProgress();
-            setTimeout(loadWordRushGame, 2000); // Load a new word after a delay
-        } else {
-            wordRushMessageEl.textContent = `Incorrect. Keep trying!`;
-        }
-    });
-
-    // Initial load
-    window.onload = () => {
-      // The auth listener will load data once authenticated, so no need for an initial load function call here.
     }
 </script>
 </body>
