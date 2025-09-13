@@ -79,10 +79,7 @@
             <!-- Dashboard Section -->
             <section id="dashboard" class="tab-content active">
                 <h2 class="text-3xl font-bold text-gray-900 mb-4">Welcome Back!</h2>
-                <div class="flex items-center mb-6">
-                    <p class="text-gray-500 text-sm mr-2">Your User ID:</p>
-                    <span id="user-id" class="font-mono text-xs md:text-sm text-gray-700 bg-gray-200 rounded-md px-2 py-1 select-all break-all">...loading...</span>
-                </div>
+                
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Progress Card -->
                     <div class="bg-gray-50 p-6 rounded-xl shadow-inner border border-gray-200">
@@ -92,15 +89,6 @@
                             <div>
                                 <p class="text-4xl font-bold text-gray-800" id="streak-counter">0</p>
                                 <p class="text-gray-500 text-sm mt-1">Days Streak</p>
-                            </div>
-                            <div class="relative w-24 h-24">
-                                <svg class="w-full h-full" viewBox="0 0 100 100">
-                                    <circle class="text-gray-200" stroke-width="8" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50"/>
-                                    <circle class="text-green-500" stroke-width="8" stroke-linecap="round" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50"
-                                        style="stroke-dasharray: 251.2; stroke-dashoffset: calc(251.2 - (251.2 * var(--progress, 0) / 100));">
-                                    </circle>
-                                </svg>
-                                <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg font-bold text-gray-700" id="progress-text">0%</span>
                             </div>
                         </div>
                     </div>
@@ -228,13 +216,21 @@
         <section id="reading" class="tab-content">
             <h2 class="text-3xl font-bold text-gray-900 mb-4">Reading Materials</h2>
             <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 overflow-y-auto max-h-[500px]">
-                <h3 class="text-2xl font-semibold text-gray-800 mb-2">The Importance of Bees</h3>
-                <p class="text-sm text-gray-600 mb-4">By a simulated author</p>
-                <p class="text-gray-700 leading-relaxed text-base">
-                    Bees are a vital part of our ecosystem, playing an essential role in the pollination of flowering plants. Without them, a large portion of our food supply would be at risk. This process of pollination is crucial for the reproduction of many plants, including a significant number of crops that we rely on for sustenance. As bees fly from flower to flower, they carry pollen, enabling plants to produce seeds and fruits.
-                    <br><br>
-                    However, bee populations have been in decline due to various factors, such as habitat loss, pesticide use, and climate change. Protecting these important insects is not just an environmental issue; it is a matter of global food security. Governments and organizations around the world are now working to create initiatives that support bee health, including promoting sustainable farming practices and creating bee-friendly habitats. By raising awareness and taking action, we can help ensure the survival of bees and, in turn, the health of our planet.
-                </p>
+                <div id="reading-content" class="text-gray-700 leading-relaxed text-base">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-2" id="reading-title"></h3>
+                    <p id="reading-passage" class="whitespace-pre-line"></p>
+                </div>
+                
+                <button id="generate-reading-btn" class="w-full mt-6 py-3 px-4 rounded-lg font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition duration-300">
+                    Generate New Reading Material
+                </button>
+            </div>
+            
+            <div class="mt-6 p-6 bg-white rounded-xl shadow-lg border border-gray-200">
+                <h3 class="text-2xl font-semibold text-gray-800 mb-4">Comprehension Questions</h3>
+                <div id="questions-container" class="space-y-6">
+                    <!-- Questions will be dynamically added here -->
+                </div>
             </div>
         </section>
         
@@ -282,7 +278,7 @@
     const db = getFirestore(app);
 
     // --- App Version ---
-    const APP_VERSION = '1.2.0';
+    const APP_VERSION = '1.3.1';
     document.getElementById('app-version').textContent = APP_VERSION;
 
     // --- Core App Logic ---
@@ -291,12 +287,12 @@
     let userId = null;
     let userData = {
         streak: 0,
-        progress: 0,
         lastCompletionDate: null
     };
     let currentDifficulty = 'beginner';
     let currentQuestion = null;
     let currentWord = '';
+    let currentReadingQuestions = [];
     const wordList = ["apple", "banana", "orange", "grape", "strawberry", "pineapple", "blueberry", "kiwi", "keyboard", "computer", "mountain", "ocean", "bicycle", "building", "guitar"];
 
     // UI Elements
@@ -327,16 +323,18 @@
     const wordRushMessageEl = document.getElementById('word-rush-message');
 
     const streakCounter = document.getElementById('streak-counter');
-    const progressText = document.getElementById('progress-text');
-    const progressCircle = document.querySelector('circle.text-green-500');
-    const userIdEl = document.getElementById('user-id');
+    
+    // Reading section elements
+    const generateReadingBtn = document.getElementById('generate-reading-btn');
+    const readingTitleEl = document.getElementById('reading-title');
+    const readingPassageEl = document.getElementById('reading-passage');
+    const questionsContainerEl = document.getElementById('questions-container');
 
     // --- Firebase Auth & Data Management ---
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             userId = user.uid;
-            userIdEl.textContent = userId;
             const userDocRef = doc(db, 'artifacts', appId, 'users', userId, 'userData', 'userProgress');
 
             const unsubscribe = onSnapshot(userDocRef, (doc) => {
@@ -367,8 +365,6 @@
 
     function updateDashboardUI() {
         streakCounter.textContent = userData.streak;
-        progressText.textContent = `${userData.progress}%`;
-        progressCircle.style.setProperty('--progress', userData.progress);
     }
 
     async function updateProgress(points = 10) {
@@ -380,22 +376,12 @@
         const today = new Date().toDateString();
         const userDocRef = doc(db, 'artifacts', appId, 'users', userId, 'userData', 'userProgress');
 
-        // Check if progress for today has already been updated
-        if (userData.lastCompletionDate === today && userData.progress >= 100) {
-            return; // Already completed for the day
-        }
-
-        // Calculate new progress and streak
-        let newProgress = Math.min(100, userData.progress + points);
         let newStreak = userData.streak;
-
         if (userData.lastCompletionDate !== today) {
             newStreak = (userData.lastCompletionDate) ? newStreak + 1 : 1;
-            newProgress = points;
         }
 
         const updatedData = {
-            progress: newProgress,
             streak: newStreak,
             lastCompletionDate: today
         };
@@ -431,6 +417,8 @@
                 loadGrammarQuestion();
             } else if (targetTab === 'word-rush') {
                 loadWordRushGame();
+            } else if (targetTab === 'reading') {
+                loadReadingMaterial();
             }
         });
     });
@@ -484,7 +472,7 @@
 
             if (score > 80) {
                 resultText.innerHTML += ` Your score is ${score}%. Great job! Your pronunciation is clear and accurate.`;
-                updateProgress(20);
+                updateProgress();
             } else if (score > 50) {
                 resultText.innerHTML += ` Your score is ${score}%. Good attempt! Practice a little more to improve clarity.`;
             } else {
@@ -728,7 +716,7 @@
 
         if (selectedOption === currentQuestion.answer) {
             grammarFeedbackEl.textContent = "Correct! " + currentQuestion.explanation;
-            updateProgress(10);
+            updateProgress();
         } else {
             grammarFeedbackEl.textContent = `Incorrect. The correct answer is "${currentQuestion.answer}". ` + currentQuestion.explanation;
         }
@@ -764,6 +752,176 @@
         }
     });
 
+    // --- Reading Section Logic ---
+    generateReadingBtn.addEventListener('click', loadReadingMaterial);
+
+    async function getReadingMaterial() {
+        const prompt = `Generate a JSON object for an English reading comprehension exercise. The passage should be around 150-200 words on an interesting topic, like nature, science, or history. The object should include a title, the full passage, and an array of exactly 10 multiple-choice questions. Each question object must have a 'text' field, an array of four 'options', and a 'correctAnswer' field. Additionally, each question should have a 'difficulty' field set to either 'easy', 'medium', or 'hard'.
+        Example JSON format:
+        {
+            "title": "The Life Cycle of a Butterfly",
+            "passage": "A butterfly's life is a fascinating journey that has four distinct stages: egg, larva, pupa, and adult. The cycle begins when a female butterfly lays eggs on a leaf or a stem. Once the egg hatches, a larva, or caterpillar, emerges...",
+            "questions": [
+                {
+                    "text": "How many stages are there in a butterfly's life cycle?",
+                    "options": ["Two", "Three", "Four", "Five"],
+                    "correctAnswer": "Four",
+                    "difficulty": "easy"
+                },
+                {
+                    "text": "What is a butterfly larva called?",
+                    "options": ["A chrysalis", "A pupa", "A moth", "A caterpillar"],
+                    "correctAnswer": "A caterpillar",
+                    "difficulty": "medium"
+                },
+                {
+                    "text": "What is the primary purpose of the caterpillar stage?",
+                    "options": ["To find a mate", "To migrate", "To grow and eat", "To lay eggs"],
+                    "correctAnswer": "To grow and eat",
+                    "difficulty": "hard"
+                }
+            ]
+        }`;
+
+        const payload = {
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: "OBJECT",
+                    properties: {
+                        "title": { "type": "STRING" },
+                        "passage": { "type": "STRING" },
+                        "questions": {
+                            "type": "ARRAY",
+                            "items": {
+                                "type": "OBJECT",
+                                "properties": {
+                                    "text": { "type": "STRING" },
+                                    "options": {
+                                        "type": "ARRAY",
+                                        "items": { "type": "STRING" }
+                                    },
+                                    "correctAnswer": { "type": "STRING" },
+                                    "difficulty": { "type": "STRING" }
+                                }
+                            }
+                        }
+                    },
+                    "propertyOrdering": ["title", "passage", "questions"]
+                }
+            },
+        };
+
+        const apiKey = "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const result = await response.json();
+            const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (jsonText) {
+                return JSON.parse(jsonText);
+            }
+        } catch (error) {
+            console.error("Failed to generate reading material:", error);
+        }
+        return null;
+    }
+
+    async function loadReadingMaterial() {
+        generateReadingBtn.disabled = true;
+        generateReadingBtn.textContent = 'Generating...';
+        readingTitleEl.textContent = 'Loading...';
+        readingPassageEl.textContent = '';
+        questionsContainerEl.innerHTML = '';
+        
+        const material = await getReadingMaterial();
+
+        if (material) {
+            readingTitleEl.textContent = material.title;
+            readingPassageEl.textContent = material.passage;
+            currentReadingQuestions = material.questions;
+            renderReadingQuestions();
+        } else {
+            readingTitleEl.textContent = 'Failed to load material.';
+            readingPassageEl.textContent = 'Please try again.';
+        }
+        
+        generateReadingBtn.disabled = false;
+        generateReadingBtn.textContent = 'Generate New Reading Material';
+    }
+
+    function renderReadingQuestions() {
+        questionsContainerEl.innerHTML = '';
+        currentReadingQuestions.forEach((q, index) => {
+            const questionCard = document.createElement('div');
+            questionCard.className = 'bg-white p-4 rounded-lg shadow-sm border border-gray-200';
+            questionCard.innerHTML = `
+                <div class="flex items-center justify-between mb-2">
+                    <p class="font-medium text-gray-800">Question ${index + 1}:</p>
+                    <span class="text-xs font-semibold px-2 py-1 rounded-full capitalize ${q.difficulty === 'easy' ? 'bg-green-100 text-green-800' : q.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}">
+                        ${q.difficulty}
+                    </span>
+                </div>
+                <p class="mb-4 text-gray-700">${q.text}</p>
+                <div class="options-container space-y-2">
+                    ${q.options.map((option, i) => `
+                        <button class="w-full text-left px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 transition duration-300 option-button" data-index="${index}" data-option="${option}">
+                            ${option}
+                        </button>
+                    `).join('')}
+                </div>
+                <p class="mt-4 text-sm font-medium feedback-text" id="feedback-${index}"></p>
+            `;
+            questionsContainerEl.appendChild(questionCard);
+        });
+
+        document.querySelectorAll('.option-button').forEach(button => {
+            button.addEventListener('click', handleReadingAnswer);
+        });
+    }
+
+    function handleReadingAnswer(event) {
+        const button = event.currentTarget;
+        const questionIndex = parseInt(button.dataset.index);
+        const selectedOption = button.dataset.option;
+        const question = currentReadingQuestions[questionIndex];
+        const feedbackEl = document.getElementById(`feedback-${questionIndex}`);
+        const optionsContainer = button.parentElement;
+
+        if (selectedOption === question.correctAnswer) {
+            feedbackEl.textContent = 'Correct!';
+            feedbackEl.classList.remove('text-red-600');
+            feedbackEl.classList.add('text-green-600');
+            updateProgress();
+        } else {
+            feedbackEl.textContent = `Incorrect. The correct answer is: ${question.correctAnswer}`;
+            feedbackEl.classList.remove('text-green-600');
+            feedbackEl.classList.add('text-red-600');
+        }
+
+        // Disable all options for this question
+        Array.from(optionsContainer.children).forEach(optionBtn => {
+            optionBtn.disabled = true;
+            if (optionBtn.dataset.option === question.correctAnswer) {
+                optionBtn.classList.remove('bg-gray-50', 'text-gray-700', 'hover:bg-gray-100');
+                optionBtn.classList.add('bg-green-500', 'text-white', 'hover:bg-green-600');
+            } else {
+                optionBtn.classList.remove('bg-gray-50', 'text-gray-700', 'hover:bg-gray-100');
+                optionBtn.classList.add('bg-red-500', 'text-white', 'hover:bg-red-600');
+            }
+        });
+    }
+
     // --- Word Rush Logic ---
     function scrambleWord(word) {
         let a = word.split("");
@@ -787,7 +945,7 @@
         const guess = wordGuessEl.value.toLowerCase().trim();
         if (guess === currentWord) {
             wordRushMessageEl.textContent = `Correct! You unscrambled "${currentWord}".`;
-            updateProgress(10);
+            updateProgress();
             setTimeout(loadWordRushGame, 2000); // Load a new word after a delay
         } else {
             wordRushMessageEl.textContent = `Incorrect. Keep trying!`;
