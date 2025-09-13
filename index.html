@@ -3,436 +3,335 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>English Phrase Learner</title>
+    <title>English Learning App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
         }
-        .container {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            padding: 1rem;
-            background-color: #e0f2fe; /* Light blue background */
-        }
-        .card {
-            background-color: white;
-            padding: 2.5rem;
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            max-width: 600px;
-            width: 100%;
-            text-align: center;
-        }
-        .phrase-box {
-            background-color: #bfdbfe; /* A slightly darker blue for the phrase */
-            padding: 1.5rem;
-            border-radius: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        .phrase-box:hover {
-            background-color: #93c5fd; /* Darker on hover */
-        }
-        .hidden-response {
+        .tab-content {
             display: none;
-            margin-top: 1rem;
-            padding: 1rem;
-            background-color: #d1fae5; /* Light green for the response */
-            border-radius: 1rem;
-            opacity: 0;
-            transition: opacity 0.5s ease;
         }
-        .speak-button {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 50%;
-            transition: background-color 0.2s;
-        }
-        .speak-button:hover {
-            background-color: rgba(0, 0, 0, 0.1);
-        }
-        .vocabulary-list {
-            max-height: 150px;
-            overflow-y: auto;
-            margin-top: 1rem;
-            padding: 0.5rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 0.5rem;
-            background-color: #f8fafc;
-            text-align: left;
-        }
-        .vocabulary-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.5rem;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .vocabulary-item:last-child {
-            border-bottom: none;
-        }
-        .delete-button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #ef4444;
-            transition: color 0.2s;
-        }
-        .delete-button:hover {
-            color: #b91c1c;
-        }
-        .share-container {
-            margin-top: 2rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        .share-id-box {
-            background-color: #e2e8f0;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            font-family: monospace;
-            word-break: break-all;
-            text-align: center;
+        .tab-content.active {
+            display: block;
         }
     </style>
 </head>
-<body>
+<body class="flex items-center justify-center min-h-screen p-4">
 
-    <div class="container">
-        <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-6">English Conversation Practice</h1>
-        <p class="text-gray-600 mb-8 text-center px-4">Click the box to reveal a common response and practice your conversational English!</p>
-
-        <div class="card">
-            <div id="phrase-box" class="phrase-box">
-                <p id="phrase-text" class="text-xl md:text-2xl font-semibold text-gray-800">Hello, how's it going?</p>
-                <button id="speak-button" class="speak-button" aria-label="Listen to phrase">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.121-7.072a8 8 0 010 11.314m-7.072-11.314a2 2 0 010 2.828m-2.122-2.828a5 5 0 010 7.072m2.121-7.072a8 8 0 010 11.314" />
-                    </svg>
+    <!-- Main Application Container -->
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-4xl overflow-hidden">
+        
+        <!-- Navigation Tabs -->
+        <nav class="bg-gray-100 p-4 border-b border-gray-200">
+            <div class="flex justify-between items-center space-x-2">
+                <button data-tab="dashboard" class="tab-button active px-4 py-2 text-sm md:text-base font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 transition duration-300">
+                    Dashboard
+                </button>
+                <button data-tab="pronunciation" class="tab-button px-4 py-2 text-sm md:text-base font-medium rounded-lg text-gray-700 hover:text-indigo-600 transition duration-300">
+                    Pronunciation
+                </button>
+                <button data-tab="grammar" class="tab-button px-4 py-2 text-sm md:text-base font-medium rounded-lg text-gray-700 hover:text-indigo-600 transition duration-300">
+                    Grammar
+                </button>
+                <button data-tab="reading" class="tab-button px-4 py-2 text-sm md:text-base font-medium rounded-lg text-gray-700 hover:text-indigo-600 transition duration-300">
+                    Reading
                 </button>
             </div>
-            
-            <div id="response-box" class="hidden-response">
-                <p id="response-text" class="text-xl md:text-2xl text-gray-700"></p>
-            </div>
-            
-            <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mt-8">
-                <button id="next-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-lg flex-1">Next Phrase</button>
-                <button id="switch-roles-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-lg flex-1">Switch Roles</button>
-            </div>
-        </div>
+        </nav>
 
-        <!-- New Vocabulary Section -->
-        <div class="card mt-8">
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-4">My Vocabulary</h2>
-            <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
-                <input id="vocabulary-input" type="text" placeholder="Add a word or phrase..." class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <button id="save-word-button" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition-colors shadow-lg">Save</button>
-            </div>
-            <div id="vocabulary-list" class="vocabulary-list">
-                <!-- Vocabulary items will be rendered here -->
-            </div>
-        </div>
+        <!-- Tab Content Sections -->
+        <main class="p-6 md:p-8">
 
-        <!-- New Share Section -->
-        <div class="card mt-8">
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-4">Share & Join Lists</h2>
-            <div class="share-container">
-                <div>
-                    <button id="share-list-button" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-lg transition-colors shadow-lg w-full">Share My List</button>
-                    <p id="share-id-display" class="share-id-box mt-2">Your Share ID will appear here.</p>
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="tab-content active">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Welcome Back!</h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Progress Card -->
+                    <div class="bg-gray-50 p-6 rounded-xl shadow-inner border border-gray-200">
+                        <h3 class="text-xl font-semibold text-indigo-600 mb-2">My Progress</h3>
+                        <p class="text-sm text-gray-600 mb-4">Track your daily progress and achievements.</p>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-4xl font-bold text-gray-800" id="streak-counter">0</p>
+                                <p class="text-gray-500 text-sm mt-1">Days Streak</p>
+                            </div>
+                            <div class="relative w-24 h-24">
+                                <svg class="w-full h-full" viewBox="0 0 100 100">
+                                    <circle class="text-gray-200" stroke-width="8" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50"/>
+                                    <circle class="text-green-500" stroke-width="8" stroke-linecap="round" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50"
+                                        style="stroke-dasharray: 251.2; stroke-dashoffset: calc(251.2 - (251.2 * var(--progress, 0) / 100));">
+                                    </circle>
+                                </svg>
+                                <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg font-bold text-gray-700" id="progress-text">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Personalized Path Card -->
+                    <div class="bg-gray-50 p-6 rounded-xl shadow-inner border border-gray-200">
+                        <h3 class="text-xl font-semibold text-indigo-600 mb-2">Your Path</h3>
+                        <p class="text-sm text-gray-600">Based on your activity, here are some recommended exercises.</p>
+                        <ul class="list-disc list-inside mt-4 space-y-1 text-gray-700 text-sm">
+                            <li>Focus on vowel sounds</li>
+                            <li>Practice simple past tense</li>
+                            <li>Read "The Little Prince"</li>
+                        </ul>
+                    </div>
+                    <!-- Gamified Exercises Card -->
+                    <div class="bg-gray-50 p-6 rounded-xl shadow-inner border border-gray-200">
+                        <h3 class="text-xl font-semibold text-indigo-600 mb-2">Gamified Drills</h3>
+                        <p class="text-sm text-gray-600">Practice with engaging mini-games.</p>
+                        <button class="w-full mt-4 py-2 px-4 rounded-lg font-medium text-white bg-indigo-500 hover:bg-indigo-600 transition duration-300">
+                            Play "Word Rush"
+                        </button>
+                    </div>
                 </div>
-                <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 items-center">
-                    <input id="share-id-input" type="text" placeholder="Enter a Share ID..." class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <button id="join-list-button" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors shadow-lg">Join List</button>
-                </div>
-            </div>
-        </div>
+            </section>
 
-        <p id="user-id" class="mt-4 text-sm text-gray-500"></p>
+            <!-- Pronunciation Section -->
+            <section id="pronunciation" class="tab-content">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Pronunciation Practice</h2>
+                <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                    <p class="text-sm text-gray-600 mb-4">Click the button and say the following phrase to practice your pronunciation:</p>
+                    <p class="text-xl md:text-2xl font-semibold text-gray-800 mb-6">"How are you doing today?"</p>
+                    <div class="flex items-center justify-center space-x-4">
+                        <button id="record-btn" class="flex items-center justify-center px-6 py-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition duration-300 focus:outline-none">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a4 4 0 11-8 0 4 4 0 018 0z" />
+                           </svg>
+                           <span id="record-text">Start Speaking</span>
+                        </button>
+                    </div>
+                    <div id="pronunciation-feedback" class="mt-6 p-4 rounded-lg text-gray-700 bg-white border border-gray-300">
+                        <p id="result-text">Your feedback will appear here.</p>
+                    </div>
+                    <div id="browser-warning" class="mt-4 p-3 rounded-lg bg-yellow-100 text-yellow-800 text-sm hidden">
+                        <p>Speech recognition is not fully supported in all browsers or environments. For best results, use Google Chrome.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Grammar Section -->
+            <section id="grammar" class="tab-content">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Grammar Drill</h2>
+                <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                    <p class="text-lg text-gray-800 mb-4" id="grammar-question"></p>
+                    <div id="grammar-options" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Options will be injected here -->
+                    </div>
+                    <div class="mt-6 p-4 rounded-lg text-gray-700 bg-white border border-gray-300">
+                        <p id="grammar-feedback">Select an option above to see feedback.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reading Section -->
+            <section id="reading" class="tab-content">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Reading Materials</h2>
+                <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 overflow-y-auto max-h-[500px]">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-2">The Importance of Bees</h3>
+                    <p class="text-sm text-gray-600 mb-4">By a simulated author</p>
+                    <p class="text-gray-700 leading-relaxed text-base">
+                        Bees are a vital part of our ecosystem, playing an essential role in the pollination of flowering plants. Without them, a large portion of our food supply would be at risk. This process of pollination is crucial for the reproduction of many plants, including a significant number of crops that we rely on for sustenance. As bees fly from flower to flower, they carry pollen, enabling plants to produce seeds and fruits.
+                        <br><br>
+                        However, bee populations have been in decline due to various factors, such as habitat loss, pesticide use, and climate change. Protecting these important insects is not just an environmental issue; it is a matter of global food security. Governments and organizations around the world are now working to create initiatives that support bee health, including promoting sustainable farming practices and creating bee-friendly habitats. By raising awareness and taking action, we can help ensure the survival of bees and, in turn, the health of our planet.
+                    </p>
+                </div>
+            </section>
+
+        </main>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, setDoc, doc, getDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <script>
+        // Check for Web Speech API support
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = SpeechRecognition ? new SpeechRecognition() : null;
 
-        // Global variables provided by the Canvas environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // UI Elements
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const recordBtn = document.getElementById('record-btn');
+        const recordText = document.getElementById('record-text');
+        const pronunciationFeedback = document.getElementById('pronunciation-feedback');
+        const resultText = document.getElementById('result-text');
+        const browserWarning = document.getElementById('browser-warning');
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        const grammarQuestionEl = document.getElementById('grammar-question');
+        const grammarOptionsEl = document.getElementById('grammar-options');
+        const grammarFeedbackEl = document.getElementById('grammar-feedback');
 
-        let userId = null;
+        const streakCounter = document.getElementById('streak-counter');
+        const progressText = document.getElementById('progress-text');
+        const progressCircle = document.querySelector('circle.text-green-500');
 
-        // --- Vocabulary Management ---
-        const vocabularyInput = document.getElementById('vocabulary-input');
-        const saveWordButton = document.getElementById('save-word-button');
-        const vocabularyList = document.getElementById('vocabulary-list');
-        const shareIdInput = document.getElementById('share-id-input');
-        const shareListButton = document.getElementById('share-list-button');
-        const joinListButton = document.getElementById('join-list-button');
-        const shareIdDisplay = document.getElementById('share-id-display');
+        let streak = 0;
+        let progress = 0;
 
-        // Phrase learner script
-        const phrases = [
-            { phrase: "Hello, how's it going?", response: "I'm doing great, thanks! How about you?" },
-            { phrase: "I'm a little bit under the weather today.", response: "Oh no, I'm sorry to hear that. I hope you feel better soon!" },
-            { phrase: "What do you do for a living?", response: "I work as a software developer. It's a challenging but rewarding job." },
-            { phrase: "It was nice talking to you.", response: "You too! Have a great day." },
-            { phrase: "Could you tell me how to get to the library?", response: "Of course. Go straight down this road and it'll be on your right." },
-            { phrase: "I'm looking forward to the weekend.", response: "Me too! Do you have any plans?" },
-            { phrase: "What's your favorite kind of food?", response: "I love Italian food, especially pasta." },
-            { phrase: "Long time no see!", response: "Wow, it has been! How have you been?" },
-            { phrase: "Let's grab a coffee sometime.", response: "That sounds great! How about Tuesday?" }
+        // Data for grammar drills
+        const grammarQuestions = [
+            {
+                question: "She _____ to the store yesterday.",
+                options: ["go", "goes", "went", "going"],
+                answer: "went"
+            },
+            {
+                question: "They _____ playing soccer right now.",
+                options: ["is", "are", "am", "be"],
+                answer: "are"
+            },
+            {
+                question: "I have _____ this movie before.",
+                options: ["see", "seen", "saw", "seeing"],
+                answer: "seen"
+            }
         ];
-        let currentPhraseIndex = 0;
-        let isRolesSwitched = false;
-        const phraseBox = document.getElementById('phrase-box');
-        const phraseText = document.getElementById('phrase-text');
-        const responseBox = document.getElementById('response-box');
-        const responseText = document.getElementById('response-text');
-        const nextButton = document.getElementById('next-button');
-        const speakButton = document.getElementById('speak-button');
-        const switchRolesButton = document.getElementById('switch-roles-button');
+        let currentGrammarQuestionIndex = 0;
 
-        // Authenticate the user and then set up the data listeners
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                // User is authenticated, set userId and listen for data changes
-                userId = user.uid;
-                document.getElementById('user-id').textContent = `User ID: ${userId}`;
-                
-                const vocabularyCollection = collection(db, `artifacts/${appId}/users/${userId}/vocabulary`);
+        // --- Core App Logic ---
+
+        // Handle tab switching
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetTab = button.dataset.tab;
+
+                // Deactivate all buttons and content
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('active', 'bg-indigo-600', 'text-white');
+                    btn.classList.add('text-gray-700', 'hover:text-indigo-600');
+                });
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                });
+
+                // Activate the selected button and content
+                button.classList.add('active', 'bg-indigo-600', 'text-white');
+                button.classList.remove('text-gray-700', 'hover:text-indigo-600');
+                document.getElementById(targetTab).classList.add('active');
+
+                // Load content for the active tab if needed
+                if (targetTab === 'grammar') {
+                    loadGrammarQuestion();
+                }
+            });
+        });
+
+        // --- Pronunciation Section Logic ---
+        if (recognition) {
+            recognition.continuous = false;
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recordBtn.addEventListener('click', () => {
+                if (recordText.textContent === 'Start Speaking') {
+                    recordText.textContent = 'Listening...';
+                    recordBtn.classList.remove('bg-red-500');
+                    recordBtn.classList.add('bg-blue-500');
+                    resultText.textContent = 'Listening...';
+                    recognition.start();
+                } else {
+                    recordText.textContent = 'Start Speaking';
+                    recordBtn.classList.remove('bg-blue-500');
+                    recordBtn.classList.add('bg-red-500');
+                    recognition.stop();
+                }
+            });
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                resultText.textContent = `You said: "${transcript}".`;
+
+                // Simple feedback based on a target phrase
+                const targetPhrase = "How are you doing today?";
+                const similarity = calculateSimilarity(transcript, targetPhrase);
+
+                if (similarity > 0.8) {
+                    resultText.textContent += " Great job! Your pronunciation is clear and accurate.";
+                } else if (similarity > 0.5) {
+                    resultText.textContent += " Good attempt! Practice a little more to improve clarity.";
+                } else {
+                    resultText.textContent += " Keep trying! Your pronunciation needs more work.";
+                }
+
+                recordText.textContent = 'Start Speaking';
+                recordBtn.classList.remove('bg-blue-500');
+                recordBtn.classList.add('bg-red-500');
+                updateProgress();
+            };
+
+            recognition.onerror = (event) => {
+                resultText.textContent = `Error occurred in speech recognition: ${event.error}`;
+                recordText.textContent = 'Start Speaking';
+                recordBtn.classList.remove('bg-blue-500');
+                recordBtn.classList.add('bg-red-500');
+            };
+
+            // Basic similarity check (could be more advanced)
+            function calculateSimilarity(str1, str2) {
+                const words1 = str1.toLowerCase().split(/\s+/);
+                const words2 = str2.toLowerCase().split(/\s+/);
+                let intersection = words1.filter(word => words2.includes(word)).length;
+                return intersection / Math.max(words1.length, words2.length);
+            }
+
+        } else {
+            // If API is not supported
+            recordBtn.disabled = true;
+            recordBtn.textContent = 'Not Supported';
+            browserWarning.classList.remove('hidden');
+        }
+
+        // --- Grammar Section Logic ---
+        function loadGrammarQuestion() {
+            const currentQuestion = grammarQuestions[currentGrammarQuestionIndex];
+            grammarQuestionEl.textContent = currentQuestion.question;
+            grammarOptionsEl.innerHTML = '';
+            grammarFeedbackEl.textContent = 'Select an option above to see feedback.';
+
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('p-3', 'rounded-lg', 'font-medium', 'text-gray-700', 'bg-white', 'border', 'border-gray-300', 'hover:bg-indigo-50', 'transition', 'duration-300');
+                button.addEventListener('click', () => checkGrammarAnswer(option));
+                grammarOptionsEl.appendChild(button);
+            });
+        }
+
+        function checkGrammarAnswer(selectedOption) {
+            const currentQuestion = grammarQuestions[currentGrammarQuestionIndex];
+            if (selectedOption === currentQuestion.answer) {
+                grammarFeedbackEl.textContent = "Correct! Great job.";
+                grammarFeedbackEl.classList.remove('text-red-600');
+                grammarFeedbackEl.classList.add('text-green-600');
+                updateProgress();
+            } else {
+                grammarFeedbackEl.textContent = `Incorrect. The correct answer is "${currentQuestion.answer}".`;
+                grammarFeedbackEl.classList.remove('text-green-600');
+                grammarFeedbackEl.classList.add('text-red-600');
+            }
             
-                onSnapshot(vocabularyCollection, (snapshot) => {
-                    const words = [];
-                    snapshot.forEach(doc => {
-                        words.push({ id: doc.id, ...doc.data() });
-                    });
-                    renderVocabulary(words);
-                }, (error) => {
-                    console.error("Error getting vocabulary list:", error);
-                });
-            } else {
-                // User is not authenticated, sign in anonymously
-                try {
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                } catch (error) {
-                    console.error("Error during authentication:", error);
-                }
-            }
-        });
-        
-        async function saveWord(word) {
-            if (!userId) {
-                console.error("User not authenticated. Cannot save word.");
-                return;
-            }
-            if (!word.trim()) {
-                console.warn("Cannot save an empty word.");
-                return;
-            }
-            try {
-                const vocabularyCollection = collection(db, `artifacts/${appId}/users/${userId}/vocabulary`);
-                await addDoc(vocabularyCollection, { word: word.trim(), createdAt: Date.now() });
-                vocabularyInput.value = '';
-            } catch (error) {
-                console.error("Error saving word:", error);
-            }
+            // Move to the next question or loop
+            currentGrammarQuestionIndex = (currentGrammarQuestionIndex + 1) % grammarQuestions.length;
+            setTimeout(loadGrammarQuestion, 1500); // Load next question after a delay
         }
 
-        async function deleteWord(docId) {
-            if (!userId) {
-                console.error("User not authenticated. Cannot delete word.");
-                return;
-            }
-            try {
-                const wordRef = doc(db, `artifacts/${appId}/users/${userId}/vocabulary`, docId);
-                await deleteDoc(wordRef);
-            } catch (error) {
-                console.error("Error deleting word:", error);
-            }
+        // --- Dashboard & Gamification Logic ---
+        function updateProgress() {
+            streak++;
+            progress = Math.min(100, progress + 10); // Example: 10% progress per correct action
+            streakCounter.textContent = streak;
+            progressText.textContent = `${progress}%`;
+            progressCircle.style.setProperty('--progress', progress);
         }
 
-        function renderVocabulary(words) {
-            vocabularyList.innerHTML = '';
-            words.sort((a, b) => a.word.localeCompare(b.word));
-            if (words.length === 0) {
-                vocabularyList.innerHTML = '<p class="text-gray-500 text-center">Your vocabulary list is empty.</p>';
-            } else {
-                words.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'vocabulary-item text-gray-800';
-                    div.innerHTML = `
-                        <span>${item.word}</span>
-                        <button class="delete-button" data-id="${item.id}" aria-label="Delete word">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                            </svg>
-                        </button>
-                    `;
-                    vocabularyList.appendChild(div);
-                });
-                document.querySelectorAll('.delete-button').forEach(button => {
-                    button.addEventListener('click', (event) => {
-                        const docId = event.currentTarget.dataset.id;
-                        deleteWord(docId);
-                    });
-                });
-            }
-        }
-        
-        async function shareVocabulary() {
-            if (!userId) {
-                console.error("User not authenticated. Cannot share list.");
-                return;
-            }
-            try {
-                const privateCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/vocabulary`);
-                const querySnapshot = await getDocs(privateCollectionRef);
-                const words = [];
-                querySnapshot.forEach(doc => {
-                    words.push(doc.data().word);
-                });
+        // Initial load
+        window.onload = () => {
+            loadGrammarQuestion();
+            // Optional: Start a fun initial animation or message.
+        };
 
-                if (words.length === 0) {
-                    shareIdDisplay.textContent = "Your list is empty. Add words before sharing!";
-                    return;
-                }
-
-                const sharedCollectionRef = collection(db, `artifacts/${appId}/public/data/shared_vocab_lists`);
-                const sharedDocRef = await addDoc(sharedCollectionRef, {
-                    owner: userId,
-                    words: words,
-                    createdAt: Date.now()
-                });
-                
-                shareIdDisplay.textContent = sharedDocRef.id;
-                shareIdInput.value = '';
-            } catch (error) {
-                console.error("Error sharing list:", error);
-                shareIdDisplay.textContent = "Error sharing list. See console for details.";
-            }
-        }
-
-        async function joinSharedList(shareId) {
-            if (!userId) {
-                console.error("User not authenticated. Cannot join list.");
-                return;
-            }
-            if (!shareId.trim()) {
-                console.warn("Please enter a Share ID.");
-                shareIdDisplay.textContent = "Please enter a Share ID.";
-                return;
-            }
-            try {
-                const sharedDocRef = doc(db, `artifacts/${appId}/public/data/shared_vocab_lists`, shareId.trim());
-                const sharedDoc = await getDoc(sharedDocRef);
-
-                if (!sharedDoc.exists()) {
-                    shareIdDisplay.textContent = "Shared list not found.";
-                    return;
-                }
-
-                const sharedWords = sharedDoc.data().words;
-                if (sharedWords.length === 0) {
-                    shareIdDisplay.textContent = "This list is empty.";
-                    return;
-                }
-
-                const privateCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/vocabulary`);
-                for (const word of sharedWords) {
-                    const q = query(privateCollectionRef, where("word", "==", word));
-                    const docs = await getDocs(q);
-                    if (docs.empty) {
-                        await addDoc(privateCollectionRef, { word: word, createdAt: Date.now() });
-                    }
-                }
-                shareIdDisplay.textContent = "Successfully joined list!";
-                shareIdInput.value = '';
-            } catch (error) {
-                console.error("Error joining list:", error);
-                shareIdDisplay.textContent = "Error joining list. See console for details.";
-            }
-        }
-
-        // Main event listeners
-        saveWordButton.addEventListener('click', () => {
-            saveWord(vocabularyInput.value);
-        });
-
-        vocabularyInput.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                saveWord(vocabularyInput.value);
-            }
-        });
-
-        shareListButton.addEventListener('click', shareVocabulary);
-        joinListButton.addEventListener('click', () => {
-            joinSharedList(shareIdInput.value);
-        });
-
-        function updatePhrase() {
-            const currentPair = phrases[currentPhraseIndex];
-            if (isRolesSwitched) {
-                phraseText.textContent = currentPair.response;
-                responseText.textContent = currentPair.phrase;
-            } else {
-                phraseText.textContent = currentPair.phrase;
-                responseText.textContent = currentPair.response;
-            }
-            responseBox.style.opacity = '0';
-            responseBox.style.display = 'none';
-        }
-        function speakPhrase(text) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'en-US';
-            speechSynthesis.speak(utterance);
-        }
-        phraseBox.addEventListener('click', (event) => {
-            if (event.target.closest('#speak-button')) {
-                return;
-            }
-            if (responseBox.style.display === 'none') {
-                responseBox.style.display = 'block';
-                setTimeout(() => { responseBox.style.opacity = '1'; }, 10);
-            } else {
-                responseBox.style.opacity = '0';
-                setTimeout(() => { responseBox.style.display = 'none'; }, 500);
-            }
-        });
-        nextButton.addEventListener('click', () => {
-            currentPhraseIndex = (currentPhraseIndex + 1) % phrases.length;
-            updatePhrase();
-        });
-        switchRolesButton.addEventListener('click', () => {
-            isRolesSwitched = !isRolesSwitched;
-            updatePhrase();
-        });
-        speakButton.addEventListener('click', () => {
-            speakPhrase(phraseText.textContent);
-        });
-        updatePhrase();
     </script>
 </body>
 </html>
