@@ -282,53 +282,407 @@
     let currentQuestion = null;
     let currentWord = '';
     const wordList = ["apple", "banana", "orange", "grape", "strawberry", "pineapple", "blueberry", "kiwi", "keyboard", "computer", "mountain", "ocean", "bicycle", "building", "guitar"];
-
-    let tabButtons, tabContents, recordBtn, recordText, pronunciationFeedback, resultText, suggestionText, browserWarning, checkWordBtn, playAudioBtn, practicePhraseInput, waveformContainer, generatePhraseBtn, grammarQuestionEl, grammarOptionsEl, grammarFeedbackEl, difficultyButtons, difficultyNotes, grammarAudioBtn, generateNewBtn, scrambledWordEl, wordGuessEl, wordRushFeedbackEl, wordRushMessageEl, streakCounter, generateReadingBtn, readingTitleEl, readingPassageEl, questionsContainerEl, currentReadingQuestions;
-
+    let currentReadingQuestions;
+    
+    // Defer all DOM element queries and logic until the document is ready
     document.addEventListener('DOMContentLoaded', async () => {
         // Initialize Firebase
         app = initializeApp(firebaseConfig);
         auth = getAuth(app);
         db = getFirestore(app);
         
-        // UI Elements
-        tabButtons = document.querySelectorAll('.tab-button');
-        tabContents = document.querySelectorAll('.tab-content');
-        recordBtn = document.getElementById('record-btn');
-        recordText = document.getElementById('record-text');
-        pronunciationFeedback = document.getElementById('pronunciation-feedback');
-        resultText = document.getElementById('result-text');
-        suggestionText = document.getElementById('suggestion-text');
-        browserWarning = document.getElementById('browser-warning');
-        checkWordBtn = document.getElementById('check-word-btn');
-        playAudioBtn = document.getElementById('play-audio-btn');
-        practicePhraseInput = document.getElementById('practice-phrase');
-        waveformContainer = document.getElementById('waveform-container');
-        generatePhraseBtn = document.getElementById('generate-phrase-btn');
+        // UI Elements - Moved inside to ensure they are available
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const recordBtn = document.getElementById('record-btn');
+        const recordText = document.getElementById('record-text');
+        const pronunciationFeedback = document.getElementById('pronunciation-feedback');
+        const resultText = document.getElementById('result-text');
+        const suggestionText = document.getElementById('suggestion-text');
+        const browserWarning = document.getElementById('browser-warning');
+        const checkWordBtn = document.getElementById('check-word-btn');
+        const playAudioBtn = document.getElementById('play-audio-btn');
+        const practicePhraseInput = document.getElementById('practice-phrase');
+        const waveformContainer = document.getElementById('waveform-container');
+        const generatePhraseBtn = document.getElementById('generate-phrase-btn');
 
-        grammarQuestionEl = document.getElementById('grammar-question');
-        grammarOptionsEl = document.getElementById('grammar-options');
-        grammarFeedbackEl = document.getElementById('grammar-feedback');
-        difficultyButtons = document.querySelectorAll('.difficulty-button');
-        difficultyNotes = document.querySelectorAll('.difficulty-note');
-        grammarAudioBtn = document.getElementById('grammar-audio-btn');
-        generateNewBtn = document.getElementById('generate-new-btn');
-        scrambledWordEl = document.getElementById('scrambled-word');
-        wordGuessEl = document.getElementById('word-guess');
-        wordRushFeedbackEl = document.getElementById('word-rush-feedback');
-        wordRushMessageEl = document.getElementById('word-rush-message');
+        const grammarQuestionEl = document.getElementById('grammar-question');
+        const grammarOptionsEl = document.getElementById('grammar-options');
+        const grammarFeedbackEl = document.getElementById('grammar-feedback');
+        const difficultyButtons = document.querySelectorAll('.difficulty-button');
+        const difficultyNotes = document.querySelectorAll('.difficulty-note');
+        const grammarAudioBtn = document.getElementById('grammar-audio-btn');
+        const generateNewBtn = document.getElementById('generate-new-btn');
+        const scrambledWordEl = document.getElementById('scrambled-word');
+        const wordGuessEl = document.getElementById('word-guess');
+        const wordRushFeedbackEl = document.getElementById('word-rush-feedback');
+        const wordRushMessageEl = document.getElementById('word-rush-message');
 
-        streakCounter = document.getElementById('streak-counter');
+        const streakCounter = document.getElementById('streak-counter');
         
-        generateReadingBtn = document.getElementById('generate-reading-btn');
-        readingTitleEl = document.getElementById('reading-title');
-        readingPassageEl = document.getElementById('reading-passage');
-        questionsContainerEl = document.getElementById('questions-container');
+        const generateReadingBtn = document.getElementById('generate-reading-btn');
+        const readingTitleEl = document.getElementById('reading-title');
+        const readingPassageEl = document.getElementById('reading-passage');
+        const questionsContainerEl = document.getElementById('questions-container');
 
-        // Initial App setup after DOM is loaded
+        // Set App Version
         const APP_VERSION = '1.3.1';
         document.getElementById('app-version').textContent = APP_VERSION;
 
+        // --- Core App Logic Functions (moved inside) ---
+        function updateDashboardUI() {
+            if (streakCounter) {
+                streakCounter.textContent = userData.streak;
+            }
+        }
+        
+        function scrambleWord(word) {
+            let a = word.split("");
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a.join("");
+        }
+    
+        function loadWordRushGame() {
+            const randomIndex = Math.floor(Math.random() * wordList.length);
+            currentWord = wordList[randomIndex];
+            const scrambled = scrambleWord(currentWord);
+            scrambledWordEl.textContent = scrambled;
+            wordGuessEl.value = '';
+            wordRushMessageEl.textContent = 'Type your guess and click "Check Answer".';
+        }
+
+        async function getNewGrammarQuestion(difficulty) {
+            const prompt = `Generate a JSON object for a grammar drill question at a "${difficulty}" difficulty level.
+            The question should test a specific grammar rule in a contextual sentence, not just a single word.
+            Provide a question with a blank space indicated by an underscore, four plausible options, the single correct answer, and a concise explanation.
+            Example response format:
+            {
+                "question": "She ___ to the store every day.",
+                "options": ["go", "goes", "went", "going"],
+                "answer": "goes",
+                "explanation": "This tests subject-verb agreement in the simple present tense. The verb 'go' must be changed to 'goes' to agree with the third-person singular subject 'she'."
+            }
+            The question and explanation should be clear and helpful for a learner.`;
+            
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            "question": { "type": "STRING" },
+                            "options": {
+                                "type": "ARRAY",
+                                "items": { "type": "STRING" }
+                            },
+                            "answer": { "type": "STRING" },
+                            "explanation": { "type": "STRING" }
+                        },
+                        "propertyOrdering": ["question", "options", "answer", "explanation"]
+                    }
+                },
+            };
+
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const result = await response.json();
+                const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (jsonText) {
+                    return JSON.parse(jsonText);
+                }
+            } catch (error) {
+                console.error("Failed to generate grammar question:", error);
+            }
+            return null;
+        }
+
+        async function loadGrammarQuestion() {
+            grammarQuestionEl.textContent = 'Loading...';
+            grammarOptionsEl.innerHTML = '';
+            grammarFeedbackEl.textContent = 'Please wait...';
+
+            currentQuestion = await getNewGrammarQuestion(currentDifficulty);
+
+            if (currentQuestion) {
+                grammarQuestionEl.textContent = currentQuestion.question;
+                grammarOptionsEl.innerHTML = '';
+                currentQuestion.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.textContent = option;
+                    button.className = "py-2 px-4 rounded-lg font-medium text-gray-700 bg-white border border-gray-300 hover:bg-indigo-100 hover:text-indigo-800 transition duration-300 text-left";
+                    button.addEventListener('click', () => handleGrammarAnswer(option));
+                    grammarOptionsEl.appendChild(button);
+                });
+                grammarFeedbackEl.textContent = 'Select an option above to see feedback.';
+            } else {
+                grammarQuestionEl.textContent = 'Failed to load question.';
+                grammarFeedbackEl.textContent = 'Please try again.';
+            }
+        }
+
+        function handleGrammarAnswer(selectedOption) {
+            if (!currentQuestion) return;
+
+            const allOptions = grammarOptionsEl.querySelectorAll('button');
+            allOptions.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === currentQuestion.answer) {
+                    button.classList.remove('bg-gray-200');
+                    button.classList.add('bg-green-500', 'text-white', 'hover:bg-green-600');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.remove('bg-gray-200');
+                    button.classList.add('bg-red-500', 'text-white', 'hover:bg-red-600');
+                }
+            });
+
+            if (selectedOption === currentQuestion.answer) {
+                grammarFeedbackEl.textContent = "Correct! " + currentQuestion.explanation;
+                updateProgress();
+            } else {
+                grammarFeedbackEl.textContent = `Incorrect. The correct answer is "${currentQuestion.answer}". ` + currentQuestion.explanation;
+            }
+        }
+        
+        function analyzePronunciation(transcript, targetPhrase) {
+            const transcriptWords = transcript.split(/\s+/).filter(word => word);
+            const targetWords = targetPhrase.split(/\s+/).filter(word => word);
+            
+            let correctCount = 0;
+            let feedbackHtml = `You said: "`;
+            let suggestionText = '';
+            let isMispronounced = false;
+
+            for (let i = 0; i < targetWords.length; i++) {
+                const targetWord = targetWords[i];
+                const spokenWord = transcriptWords[i] || '';
+                
+                if (spokenWord === targetWord) {
+                    feedbackHtml += `<span class="clickable-word" data-word="${targetWord}">${spokenWord}</span> `;
+                    correctCount++;
+                } else {
+                    feedbackHtml += `<span class="highlight clickable-word" data-word="${targetWord}">${spokenWord || '...'}</span> `;
+                    if (!isMispronounced) {
+                        suggestionText = `Suggestion: It seems you had trouble with "${targetWord}". Try to enunciate the word clearly.`;
+                        isMispronounced = true;
+                    }
+                }
+            }
+            
+            feedbackHtml += `"`;
+
+            const similarity = correctCount / targetWords.length;
+            const score = Math.floor(similarity * 100);
+
+            return { score, feedback: feedbackHtml, suggestion: suggestionText };
+        }
+
+        async function updateProgress(points = 10) {
+            if (!userId) {
+                console.error("User not authenticated.");
+                return;
+            }
+
+            const today = new Date().toDateString();
+            const userDocRef = doc(db, 'artifacts', appId, 'users', userId, 'userData', 'userProgress');
+
+            let newStreak = userData.streak;
+            if (userData.lastCompletionDate !== today) {
+                newStreak = (userData.lastCompletionDate) ? newStreak + 1 : 1;
+            }
+
+            const updatedData = {
+                streak: newStreak,
+                lastCompletionDate: today
+            };
+
+            try {
+                await setDoc(userDocRef, updatedData, { merge: true });
+            } catch (e) {
+                console.error("Error updating progress: ", e);
+            }
+        }
+        
+        async function getReadingMaterial() {
+            const prompt = `Generate a JSON object for an English reading comprehension exercise. The passage should be around 150-200 words on an interesting topic, like nature, science, or history. The object should include a title, the full passage, and an array of exactly 10 multiple-choice questions. Each question object must have a 'text' field, an array of four 'options', and a 'correctAnswer' field. Additionally, each question should have a 'difficulty' field set to either 'easy', 'medium', or 'hard'.
+            Example JSON format:
+            {
+                "title": "The Life Cycle of a Butterfly",
+                "passage": "A butterfly's life is a fascinating journey that has four distinct stages: egg, larva, pupa, and adult. The cycle begins when a female butterfly lays eggs on a leaf or a stem. Once the egg hatches, a larva, or caterpillar, emerges...",
+                "questions": [
+                    {
+                        "text": "How many stages are there in a butterfly's life cycle?",
+                        "options": ["Two", "Three", "Four", "Five"],
+                        "correctAnswer": "Four",
+                        "difficulty": "easy"
+                    },
+                    {
+                        "text": "What is a butterfly larva called?",
+                        "options": ["A chrysalis", "A pupa", "A moth", "A caterpillar"],
+                        "correctAnswer": "A caterpillar",
+                        "difficulty": "medium"
+                    },
+                    {
+                        "text": "What is the primary purpose of the caterpillar stage?",
+                        "options": ["To find a mate", "To migrate", "To grow and eat", "To lay eggs"],
+                        "correctAnswer": "To grow and eat",
+                        "difficulty": "hard"
+                    }
+                ]
+            }`;
+
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            "title": { "type": "STRING" },
+                            "passage": { "type": "STRING" },
+                            "questions": {
+                                "type": "ARRAY",
+                                "items": {
+                                    "type": "OBJECT",
+                                    "properties": {
+                                        "text": { "type": "STRING" },
+                                        "options": {
+                                            "type": "ARRAY",
+                                            "items": { "type": "STRING" }
+                                        },
+                                        "correctAnswer": { "type": "STRING" },
+                                        "difficulty": { "type": "STRING" }
+                                    }
+                                }
+                            }
+                        },
+                        "propertyOrdering": ["title", "passage", "questions"]
+                    }
+                },
+            };
+
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const result = await response.json();
+                const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (jsonText) {
+                    return JSON.parse(jsonText);
+                }
+            } catch (error) {
+                console.error("Failed to generate reading material:", error);
+            }
+            return null;
+        }
+
+        async function loadReadingMaterial() {
+            generateReadingBtn.disabled = true;
+            generateReadingBtn.textContent = 'Generating...';
+            readingTitleEl.textContent = 'Loading...';
+            readingPassageEl.textContent = '';
+            questionsContainerEl.innerHTML = '';
+            
+            const material = await getReadingMaterial();
+
+            if (material) {
+                readingTitleEl.textContent = material.title;
+                readingPassageEl.textContent = material.passage;
+                currentReadingQuestions = material.questions;
+                renderReadingQuestions();
+            } else {
+                readingTitleEl.textContent = 'Failed to load material.';
+                readingPassageEl.textContent = 'Please try again.';
+            }
+            
+            generateReadingBtn.disabled = false;
+            generateReadingBtn.textContent = 'Generate New Reading Material';
+        }
+
+        function renderReadingQuestions() {
+            questionsContainerEl.innerHTML = '';
+            currentReadingQuestions.forEach((q, index) => {
+                const questionCard = document.createElement('div');
+                questionCard.className = 'bg-white p-4 rounded-lg shadow-sm border border-gray-200';
+                questionCard.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="font-medium text-gray-800">Question ${index + 1}:</p>
+                        <span class="text-xs font-semibold px-2 py-1 rounded-full capitalize ${q.difficulty === 'easy' ? 'bg-green-100 text-green-800' : q.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}">
+                            ${q.difficulty}
+                        </span>
+                    </div>
+                    <p class="mb-4 text-gray-700">${q.text}</p>
+                    <div class="options-container space-y-2">
+                        ${q.options.map((option, i) => `
+                            <button class="w-full text-left px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 transition duration-300 option-button" data-index="${index}" data-option="${option}">
+                                ${option}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <p class="mt-4 text-sm font-medium feedback-text" id="feedback-${index}"></p>
+                `;
+                questionsContainerEl.appendChild(questionCard);
+            });
+
+            document.querySelectorAll('.option-button').forEach(button => {
+                button.addEventListener('click', handleReadingAnswer);
+            });
+        }
+
+        function handleReadingAnswer(event) {
+            const button = event.currentTarget;
+            const questionIndex = parseInt(button.dataset.index);
+            const selectedOption = button.dataset.option;
+            const question = currentReadingQuestions[questionIndex];
+            const feedbackEl = document.getElementById(`feedback-${questionIndex}`);
+            const optionsContainer = button.parentElement;
+
+            if (selectedOption === question.correctAnswer) {
+                feedbackEl.textContent = 'Correct!';
+                feedbackEl.classList.remove('text-red-600');
+                feedbackEl.classList.add('text-green-600');
+                updateProgress();
+            } else {
+                feedbackEl.textContent = `Incorrect. The correct answer is: ${question.correctAnswer}`;
+                feedbackEl.classList.remove('text-green-600');
+                feedbackEl.classList.add('text-red-600');
+            }
+
+            Array.from(optionsContainer.children).forEach(optionBtn => {
+                optionBtn.disabled = true;
+                if (optionBtn.dataset.option === question.correctAnswer) {
+                    optionBtn.classList.remove('bg-gray-50', 'text-gray-700', 'hover:bg-gray-100');
+                    optionBtn.classList.add('bg-green-500', 'text-white', 'hover:bg-green-600');
+                } else {
+                    optionBtn.classList.remove('bg-gray-50', 'text-gray-700', 'hover:bg-gray-100');
+                    optionBtn.classList.add('bg-red-500', 'text-white', 'hover:bg-red-600');
+                }
+            });
+        }
+        
         // --- Firebase Auth & Data Management ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -581,361 +935,12 @@
                 wordRushMessageEl.textContent = `Incorrect. Keep trying!`;
             }
         });
+        
+        // Initial page loads
+        loadGrammarQuestion();
+        loadWordRushGame();
+        loadReadingMaterial();
     });
-
-    // --- Core App Logic Functions ---
-    function updateDashboardUI() {
-        if (streakCounter) {
-            streakCounter.textContent = userData.streak;
-        }
-    }
-
-    async function updateProgress(points = 10) {
-        if (!userId) {
-            console.error("User not authenticated.");
-            return;
-        }
-
-        const today = new Date().toDateString();
-        const userDocRef = doc(db, 'artifacts', appId, 'users', userId, 'userData', 'userProgress');
-
-        let newStreak = userData.streak;
-        if (userData.lastCompletionDate !== today) {
-            newStreak = (userData.lastCompletionDate) ? newStreak + 1 : 1;
-        }
-
-        const updatedData = {
-            streak: newStreak,
-            lastCompletionDate: today
-        };
-
-        try {
-            await setDoc(userDocRef, updatedData, { merge: true });
-        } catch (e) {
-            console.error("Error updating progress: ", e);
-        }
-    }
-    
-    function analyzePronunciation(transcript, targetPhrase) {
-        const transcriptWords = transcript.split(/\s+/).filter(word => word);
-        const targetWords = targetPhrase.split(/\s+/).filter(word => word);
-        
-        let correctCount = 0;
-        let feedbackHtml = `You said: "`;
-        let suggestionText = '';
-        let isMispronounced = false;
-
-        for (let i = 0; i < targetWords.length; i++) {
-            const targetWord = targetWords[i];
-            const spokenWord = transcriptWords[i] || '';
-            
-            if (spokenWord === targetWord) {
-                feedbackHtml += `<span class="clickable-word" data-word="${targetWord}">${spokenWord}</span> `;
-                correctCount++;
-            } else {
-                feedbackHtml += `<span class="highlight clickable-word" data-word="${targetWord}">${spokenWord || '...'}</span> `;
-                if (!isMispronounced) {
-                    suggestionText = `Suggestion: It seems you had trouble with "${targetWord}". Try to enunciate the word clearly.`;
-                    isMispronounced = true;
-                }
-            }
-        }
-        
-        feedbackHtml += `"`;
-
-        const similarity = correctCount / targetWords.length;
-        const score = Math.floor(similarity * 100);
-
-        return { score, feedback: feedbackHtml, suggestion: suggestionText };
-    }
-
-    async function getNewGrammarQuestion(difficulty) {
-        const prompt = `Generate a JSON object for a grammar drill question at a "${difficulty}" difficulty level.
-        The question should test a specific grammar rule in a contextual sentence, not just a single word.
-        Provide a question with a blank space indicated by an underscore, four plausible options, the single correct answer, and a concise explanation.
-        Example response format:
-        {
-            "question": "She ___ to the store every day.",
-            "options": ["go", "goes", "went", "going"],
-            "answer": "goes",
-            "explanation": "This tests subject-verb agreement in the simple present tense. The verb 'go' must be changed to 'goes' to agree with the third-person singular subject 'she'."
-        }
-        The question and explanation should be clear and helpful for a learner.`;
-        
-        const payload = {
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: "OBJECT",
-                    properties: {
-                        "question": { "type": "STRING" },
-                        "options": {
-                            "type": "ARRAY",
-                            "items": { "type": "STRING" }
-                        },
-                        "answer": { "type": "STRING" },
-                        "explanation": { "type": "STRING" }
-                    },
-                    "propertyOrdering": ["question", "options", "answer", "explanation"]
-                }
-            },
-        };
-
-        const apiKey = "";
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-        try {
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const result = await response.json();
-            const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (jsonText) {
-                return JSON.parse(jsonText);
-            }
-        } catch (error) {
-            console.error("Failed to generate grammar question:", error);
-        }
-        return null;
-    }
-
-    async function loadGrammarQuestion() {
-        grammarQuestionEl.textContent = 'Loading...';
-        grammarOptionsEl.innerHTML = '';
-        grammarFeedbackEl.textContent = 'Please wait...';
-
-        currentQuestion = await getNewGrammarQuestion(currentDifficulty);
-
-        if (currentQuestion) {
-            grammarQuestionEl.textContent = currentQuestion.question;
-            grammarOptionsEl.innerHTML = '';
-            currentQuestion.options.forEach(option => {
-                const button = document.createElement('button');
-                button.textContent = option;
-                button.className = "py-2 px-4 rounded-lg font-medium text-gray-700 bg-white border border-gray-300 hover:bg-indigo-100 hover:text-indigo-800 transition duration-300 text-left";
-                button.addEventListener('click', () => handleGrammarAnswer(option));
-                grammarOptionsEl.appendChild(button);
-            });
-            grammarFeedbackEl.textContent = 'Select an option above to see feedback.';
-        } else {
-            grammarQuestionEl.textContent = 'Failed to load question.';
-            grammarFeedbackEl.textContent = 'Please try again.';
-        }
-    }
-
-    function handleGrammarAnswer(selectedOption) {
-        if (!currentQuestion) return;
-
-        const allOptions = grammarOptionsEl.querySelectorAll('button');
-        allOptions.forEach(button => {
-            button.disabled = true;
-            if (button.textContent === currentQuestion.answer) {
-                button.classList.remove('bg-gray-200');
-                button.classList.add('bg-green-500', 'text-white', 'hover:bg-green-600');
-            } else if (button.textContent === selectedOption) {
-                button.classList.remove('bg-gray-200');
-                button.classList.add('bg-red-500', 'text-white', 'hover:bg-red-600');
-            }
-        });
-
-        if (selectedOption === currentQuestion.answer) {
-            grammarFeedbackEl.textContent = "Correct! " + currentQuestion.explanation;
-            updateProgress();
-        } else {
-            grammarFeedbackEl.textContent = `Incorrect. The correct answer is "${currentQuestion.answer}". ` + currentQuestion.explanation;
-        }
-    }
-    
-    async function getReadingMaterial() {
-        const prompt = `Generate a JSON object for an English reading comprehension exercise. The passage should be around 150-200 words on an interesting topic, like nature, science, or history. The object should include a title, the full passage, and an array of exactly 10 multiple-choice questions. Each question object must have a 'text' field, an array of four 'options', and a 'correctAnswer' field. Additionally, each question should have a 'difficulty' field set to either 'easy', 'medium', or 'hard'.
-        Example JSON format:
-        {
-            "title": "The Life Cycle of a Butterfly",
-            "passage": "A butterfly's life is a fascinating journey that has four distinct stages: egg, larva, pupa, and adult. The cycle begins when a female butterfly lays eggs on a leaf or a stem. Once the egg hatches, a larva, or caterpillar, emerges...",
-            "questions": [
-                {
-                    "text": "How many stages are there in a butterfly's life cycle?",
-                    "options": ["Two", "Three", "Four", "Five"],
-                    "correctAnswer": "Four",
-                    "difficulty": "easy"
-                },
-                {
-                    "text": "What is a butterfly larva called?",
-                    "options": ["A chrysalis", "A pupa", "A moth", "A caterpillar"],
-                    "correctAnswer": "A caterpillar",
-                    "difficulty": "medium"
-                },
-                {
-                    "text": "What is the primary purpose of the caterpillar stage?",
-                    "options": ["To find a mate", "To migrate", "To grow and eat", "To lay eggs"],
-                    "correctAnswer": "To grow and eat",
-                    "difficulty": "hard"
-                }
-            ]
-        }`;
-
-        const payload = {
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: "OBJECT",
-                    properties: {
-                        "title": { "type": "STRING" },
-                        "passage": { "type": "STRING" },
-                        "questions": {
-                            "type": "ARRAY",
-                            "items": {
-                                "type": "OBJECT",
-                                "properties": {
-                                    "text": { "type": "STRING" },
-                                    "options": {
-                                        "type": "ARRAY",
-                                        "items": { "type": "STRING" }
-                                    },
-                                    "correctAnswer": { "type": "STRING" },
-                                    "difficulty": { "type": "STRING" }
-                                }
-                            }
-                        }
-                    },
-                    "propertyOrdering": ["title", "passage", "questions"]
-                }
-            },
-        };
-
-        const apiKey = "";
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-        try {
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const result = await response.json();
-            const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (jsonText) {
-                return JSON.parse(jsonText);
-            }
-        } catch (error) {
-            console.error("Failed to generate reading material:", error);
-        }
-        return null;
-    }
-
-    async function loadReadingMaterial() {
-        generateReadingBtn.disabled = true;
-        generateReadingBtn.textContent = 'Generating...';
-        readingTitleEl.textContent = 'Loading...';
-        readingPassageEl.textContent = '';
-        questionsContainerEl.innerHTML = '';
-        
-        const material = await getReadingMaterial();
-
-        if (material) {
-            readingTitleEl.textContent = material.title;
-            readingPassageEl.textContent = material.passage;
-            currentReadingQuestions = material.questions;
-            renderReadingQuestions();
-        } else {
-            readingTitleEl.textContent = 'Failed to load material.';
-            readingPassageEl.textContent = 'Please try again.';
-        }
-        
-        generateReadingBtn.disabled = false;
-        generateReadingBtn.textContent = 'Generate New Reading Material';
-    }
-
-    function renderReadingQuestions() {
-        questionsContainerEl.innerHTML = '';
-        currentReadingQuestions.forEach((q, index) => {
-            const questionCard = document.createElement('div');
-            questionCard.className = 'bg-white p-4 rounded-lg shadow-sm border border-gray-200';
-            questionCard.innerHTML = `
-                <div class="flex items-center justify-between mb-2">
-                    <p class="font-medium text-gray-800">Question ${index + 1}:</p>
-                    <span class="text-xs font-semibold px-2 py-1 rounded-full capitalize ${q.difficulty === 'easy' ? 'bg-green-100 text-green-800' : q.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}">
-                        ${q.difficulty}
-                    </span>
-                </div>
-                <p class="mb-4 text-gray-700">${q.text}</p>
-                <div class="options-container space-y-2">
-                    ${q.options.map((option, i) => `
-                        <button class="w-full text-left px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 transition duration-300 option-button" data-index="${index}" data-option="${option}">
-                            ${option}
-                        </button>
-                    `).join('')}
-                </div>
-                <p class="mt-4 text-sm font-medium feedback-text" id="feedback-${index}"></p>
-            `;
-            questionsContainerEl.appendChild(questionCard);
-        });
-
-        document.querySelectorAll('.option-button').forEach(button => {
-            button.addEventListener('click', handleReadingAnswer);
-        });
-    }
-
-    function handleReadingAnswer(event) {
-        const button = event.currentTarget;
-        const questionIndex = parseInt(button.dataset.index);
-        const selectedOption = button.dataset.option;
-        const question = currentReadingQuestions[questionIndex];
-        const feedbackEl = document.getElementById(`feedback-${questionIndex}`);
-        const optionsContainer = button.parentElement;
-
-        if (selectedOption === question.correctAnswer) {
-            feedbackEl.textContent = 'Correct!';
-            feedbackEl.classList.remove('text-red-600');
-            feedbackEl.classList.add('text-green-600');
-            updateProgress();
-        } else {
-            feedbackEl.textContent = `Incorrect. The correct answer is: ${question.correctAnswer}`;
-            feedbackEl.classList.remove('text-green-600');
-            feedbackEl.classList.add('text-red-600');
-        }
-
-        Array.from(optionsContainer.children).forEach(optionBtn => {
-            optionBtn.disabled = true;
-            if (optionBtn.dataset.option === question.correctAnswer) {
-                optionBtn.classList.remove('bg-gray-50', 'text-gray-700', 'hover:bg-gray-100');
-                optionBtn.classList.add('bg-green-500', 'text-white', 'hover:bg-green-600');
-            } else {
-                optionBtn.classList.remove('bg-gray-50', 'text-gray-700', 'hover:bg-gray-100');
-                optionBtn.classList.add('bg-red-500', 'text-white', 'hover:bg-red-600');
-            }
-        });
-    }
-
-    function scrambleWord(word) {
-        let a = word.split("");
-        for (let i = a.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [a[i], a[j]] = [a[j], a[i]];
-        }
-        return a.join("");
-    }
-
-    function loadWordRushGame() {
-        const randomIndex = Math.floor(Math.random() * wordList.length);
-        currentWord = wordList[randomIndex];
-        const scrambled = scrambleWord(currentWord);
-        scrambledWordEl.textContent = scrambled;
-        wordGuessEl.value = '';
-        wordRushMessageEl.textContent = 'Type your guess and click "Check Answer".';
-    }
 </script>
 </body>
 </html>
