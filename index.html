@@ -49,8 +49,10 @@
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-4">
 
+    <!-- Main Application Container -->
     <div class="bg-white rounded-xl shadow-lg w-full max-w-4xl overflow-hidden mb-4">
         
+        <!-- Navigation Tabs -->
         <nav class="bg-gray-100 p-4 border-b border-gray-200">
             <div class="flex justify-between items-center space-x-2">
                 <button data-tab="dashboard" class="tab-button active px-4 py-2 text-sm md:text-base font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 transition duration-300">
@@ -71,11 +73,15 @@
             </div>
         </nav>
 
+        <!-- Tab Content Sections -->
         <main class="p-6 md:p-8">
 
+            <!-- Dashboard Section -->
             <section id="dashboard" class="tab-content active">
                 <h2 class="text-3xl font-bold text-gray-900 mb-4">Welcome Back!</h2>
+                
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Progress Card -->
                     <div class="bg-gray-50 p-6 rounded-xl shadow-inner border border-gray-200">
                         <h3 class="text-xl font-semibold text-indigo-600 mb-2">My Progress</h3>
                         <p class="text-sm text-gray-600 mb-4">Track your daily progress and achievements.</p>
@@ -84,17 +90,9 @@
                                 <p class="text-4xl font-bold text-gray-800" id="streak-counter">0</p>
                                 <p class="text-gray-500 text-sm mt-1">Days Streak</p>
                             </div>
-                            <div class="relative w-24 h-24">
-                                <svg class="w-full h-full" viewBox="0 0 100 100">
-                                    <circle class="text-gray-200" stroke-width="8" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50"/>
-                                    <circle class="text-green-500" stroke-width="8" stroke-linecap="round" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50"
-                                        style="stroke-dasharray: 251.2; stroke-dashoffset: calc(251.2 - (251.2 * var(--progress, 0) / 100));">
-                                    </circle>
-                                </svg>
-                                <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg font-bold text-gray-700" id="progress-text">0%</span>
-                            </div>
                         </div>
                     </div>
+                    <!-- Gamified Exercises Card -->
                     <div class="bg-gray-50 p-6 rounded-xl shadow-inner border border-gray-200">
                         <h3 class="text-xl font-semibold text-indigo-600 mb-2">Gamified Drills</h3>
                         <p class="text-sm text-gray-600">Practice with engaging mini-games.</p>
@@ -105,6 +103,7 @@
                 </div>
             </section>
 
+            <!-- Pronunciation Section -->
             <section id="pronunciation" class="tab-content">
                 <h2 class="text-3xl font-bold text-gray-900 mb-4">Pronunciation Practice</h2>
                 <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
@@ -132,6 +131,7 @@
                         </button>
                     </div>
 
+                    <!-- Simulated Waveform -->
                     <div id="waveform-container" class="flex items-center justify-center w-full h-16 bg-white rounded-lg border border-gray-300 overflow-hidden hidden">
                         <div class="waveform-bar" style="height: 10%;"></div>
                         <div class="waveform-bar" style="height: 30%; animation-delay: 0.1s;"></div>
@@ -154,26 +154,29 @@
                 </div>
             </section>
 
+            <!-- Grammar Section -->
             <section id="grammar" class="tab-content">
                 <h2 class="text-3xl font-bold text-gray-900 mb-4">Grammar Drill</h2>
                 
+                <!-- Difficulty Notes -->
                 <div data-difficulty-note="beginner" class="difficulty-note active bg-indigo-100 text-indigo-800 p-4 rounded-lg mb-4 text-sm font-medium">
                     <p>
                         ⭐ **Beginner Level:** You'll practice foundational grammar skills, focusing on simple tenses (present, past, future), subject-verb agreement, and basic sentence structure.
                     </p>
                 </div>
-                <div data-difficulty-note="intermediate" class="difficulty-note hidden bg-indigo-100 text-indigo-800 p-4 rounded-lg mb-4 text-sm font-medium">
+                <div data-difficulty-note="intermediate" class="difficulty-note bg-indigo-100 text-indigo-800 p-4 rounded-lg mb-4 text-sm font-medium">
                     <p>
                         🧠 **Intermediate Level:** You'll work on more complex grammar, including perfect tenses (present perfect, past perfect), modal verbs, and conditional sentences.
                     </p>
                 </div>
-                <div data-difficulty-note="advanced" class="difficulty-note hidden bg-indigo-100 text-indigo-800 p-4 rounded-lg mb-4 text-sm font-medium">
+                <div data-difficulty-note="advanced" class="difficulty-note bg-indigo-100 text-indigo-800 p-4 rounded-lg mb-4 text-sm font-medium">
                     <p>
                         🚀 **Advanced Level:** You'll be challenged with advanced topics like the passive voice, reported speech, and sophisticated sentence constructions.
                     </p>
                 </div>
 
                 <div class="flex flex-col md:flex-row md:items-center justify-between mb-4">
+                    <!-- Difficulty and Points -->
                     <div class="flex items-center space-x-4 mb-4 md:mb-0">
                         <div class="flex space-x-2">
                             <button data-difficulty="beginner" class="difficulty-button active px-3 py-1 text-sm font-medium rounded-full bg-indigo-600 text-white transition duration-300">Beginner</button>
@@ -182,24 +185,26 @@
                         </div>
                     </div>
 
+                    <!-- Navigation Buttons -->
                     <div class="flex space-x-2">
-                         <button id="generate-new-btn" class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-indigo-500 hover:bg-indigo-600 transition duration-300">
+                           <button id="generate-new-btn" class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-indigo-500 hover:bg-indigo-600 transition duration-300">
                             New Question
                         </button>
                     </div>
                 </div>
                 
                 <div class="flex items-center mb-4">
-                     <p class="text-lg text-gray-800 mr-2" id="grammar-question"></p>
-                     <button id="grammar-audio-btn" class="p-2 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition duration-300">
+                    <p class="text-lg text-gray-800 mr-2" id="grammar-question"></p>
+                    <button id="grammar-audio-btn" class="p-2 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition duration-300">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.5 7a.5.5 0 000 1h2a.5.5 0 000-1h-2zM15 9h-1a.5.5 0 000 1h1a.5.5 0 000-1zM14.5 11a.5.5 0 000 1h2a.5.5 0 000-1h-2z" clip-rule="evenodd" />
                         </svg>
-                     </button>
+                    </button>
                 </div>
 
                 <div id="grammar-options" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    </div>
+                    <!-- Options or input will be injected here -->
+                </div>
 
                 <div class="mt-6 p-4 rounded-lg text-gray-700 bg-white border border-gray-300">
                     <p id="grammar-feedback">Select an option above to see feedback.</p>
@@ -207,19 +212,29 @@
             </div>
         </section>
 
+        <!-- Reading Section -->
         <section id="reading" class="tab-content">
             <h2 class="text-3xl font-bold text-gray-900 mb-4">Reading Materials</h2>
             <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 overflow-y-auto max-h-[500px]">
-                <h3 class="text-2xl font-semibold text-gray-800 mb-2">The Importance of Bees</h3>
-                <p class="text-sm text-gray-600 mb-4">By a simulated author</p>
-                <p class="text-gray-700 leading-relaxed text-base">
-                    Bees are a vital part of our ecosystem, playing an essential role in the pollination of flowering plants. Without them, a large portion of our food supply would be at risk. This process of pollination is crucial for the reproduction of many plants, including a significant number of crops that we rely on for sustenance. As bees fly from flower to flower, they carry pollen, enabling plants to produce seeds and fruits.
-                    <br><br>
-                    However, bee populations have been in decline due to various factors, such as habitat loss, pesticide use, and climate change. Protecting these important insects is not just an environmental issue; it is a matter of global food security. Governments and organizations around the world are now working to create initiatives that support bee health, including promoting sustainable farming practices and creating bee-friendly habitats. By raising awareness and taking action, we can help ensure the survival of bees and, in turn, the health of our planet.
-                </p>
+                <div id="reading-content" class="text-gray-700 leading-relaxed text-base">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-2" id="reading-title"></h3>
+                    <p id="reading-passage" class="whitespace-pre-line"></p>
+                </div>
+                
+                <button id="generate-reading-btn" class="w-full mt-6 py-3 px-4 rounded-lg font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition duration-300">
+                    Generate New Reading Material
+                </button>
+            </div>
+            
+            <div class="mt-6 p-6 bg-white rounded-xl shadow-lg border border-gray-200">
+                <h3 class="text-2xl font-semibold text-gray-800 mb-4">Comprehension Questions</h3>
+                <div id="questions-container" class="space-y-6">
+                    <!-- Questions will be dynamically added here -->
+                </div>
             </div>
         </section>
         
+        <!-- Word Rush Section -->
         <section id="word-rush" class="tab-content">
             <h2 class="text-3xl font-bold text-gray-900 mb-4">Word Rush</h2>
             <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
@@ -240,302 +255,412 @@
     </main>
 </div>
 
+<!-- App Version Footer -->
 <div class="mt-4 text-center text-gray-400 text-sm">
     <p>Version <span id="app-version"></span></p>
 </div>
 
 <script type="module">
-    // --- App Version ---
-    const APP_VERSION = '1.1.0';
-    document.getElementById('app-version').textContent = APP_VERSION;
-
-    // --- App Logic ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    setLogLevel('Debug');
     
-    // Check for Web Speech API support
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = SpeechRecognition ? new SpeechRecognition() : null;
-    const synthesis = window.speechSynthesis;
+    // Global variables from the Canvas environment
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-    // UI Elements
-    const tabButtons = document.querySelectorAll('.tab-button');
-    const tabContents = document.querySelectorAll('.tab-content');
-    const recordBtn = document.getElementById('record-btn');
-    const recordText = document.getElementById('record-text');
-    const pronunciationFeedback = document.getElementById('pronunciation-feedback');
-    const resultText = document.getElementById('result-text');
-    const suggestionText = document.getElementById('suggestion-text');
-    const browserWarning = document.getElementById('browser-warning');
-    const wordRushButton = document.querySelector('[data-tab="word-rush"]');
-    const checkWordBtn = document.getElementById('check-word-btn');
-    const playAudioBtn = document.getElementById('play-audio-btn');
-    const practicePhraseInput = document.getElementById('practice-phrase');
-    const waveformContainer = document.getElementById('waveform-container');
-    const generatePhraseBtn = document.getElementById('generate-phrase-btn');
-
-    const grammarQuestionEl = document.getElementById('grammar-question');
-    const grammarOptionsEl = document.getElementById('grammar-options');
-    const grammarFeedbackEl = document.getElementById('grammar-feedback');
-    const difficultyButtons = document.querySelectorAll('.difficulty-button');
-    const difficultyNotes = document.querySelectorAll('.difficulty-note');
-    const grammarAudioBtn = document.getElementById('grammar-audio-btn');
-    const generateNewBtn = document.getElementById('generate-new-btn');
-
-    const streakCounter = document.getElementById('streak-counter');
-    const progressText = document.getElementById('progress-text');
-    const progressCircle = document.querySelector('circle.text-green-500');
-
-    let streak = parseInt(localStorage.getItem('streak')) || 0;
-    let progress = parseInt(localStorage.getItem('progress')) || 0;
-    let lastCompletionDate = localStorage.getItem('lastCompletionDate') || null;
+    let app, auth, db;
+    let userId = null;
+    let userData = {
+        streak: 0,
+        lastCompletionDate: null
+    };
     let currentDifficulty = 'beginner';
     let currentQuestion = null;
-
     let currentWord = '';
-    const wordList = ["apple", "banana", "orange", "grape", "strawberry", "pineapple", "blueberry", "kiwi"];
+    const wordList = ["apple", "banana", "orange", "grape", "strawberry", "pineapple", "blueberry", "kiwi", "keyboard", "computer", "mountain", "ocean", "bicycle", "building", "guitar"];
 
-    // --- Core App Logic ---
+    let tabButtons, tabContents, recordBtn, recordText, pronunciationFeedback, resultText, suggestionText, browserWarning, checkWordBtn, playAudioBtn, practicePhraseInput, waveformContainer, generatePhraseBtn, grammarQuestionEl, grammarOptionsEl, grammarFeedbackEl, difficultyButtons, difficultyNotes, grammarAudioBtn, generateNewBtn, scrambledWordEl, wordGuessEl, wordRushFeedbackEl, wordRushMessageEl, streakCounter, generateReadingBtn, readingTitleEl, readingPassageEl, questionsContainerEl, currentReadingQuestions;
 
-    // Handle tab switching
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const targetTab = button.dataset.tab;
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Initialize Firebase
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        
+        // UI Elements
+        tabButtons = document.querySelectorAll('.tab-button');
+        tabContents = document.querySelectorAll('.tab-content');
+        recordBtn = document.getElementById('record-btn');
+        recordText = document.getElementById('record-text');
+        pronunciationFeedback = document.getElementById('pronunciation-feedback');
+        resultText = document.getElementById('result-text');
+        suggestionText = document.getElementById('suggestion-text');
+        browserWarning = document.getElementById('browser-warning');
+        checkWordBtn = document.getElementById('check-word-btn');
+        playAudioBtn = document.getElementById('play-audio-btn');
+        practicePhraseInput = document.getElementById('practice-phrase');
+        waveformContainer = document.getElementById('waveform-container');
+        generatePhraseBtn = document.getElementById('generate-phrase-btn');
 
-            // Deactivate all buttons and content
-            tabButtons.forEach(btn => {
-                btn.classList.remove('active', 'bg-indigo-600', 'text-white');
-                btn.classList.add('text-gray-700', 'hover:text-indigo-600');
-            });
-            tabContents.forEach(content => {
-                content.classList.remove('active');
-            });
+        grammarQuestionEl = document.getElementById('grammar-question');
+        grammarOptionsEl = document.getElementById('grammar-options');
+        grammarFeedbackEl = document.getElementById('grammar-feedback');
+        difficultyButtons = document.querySelectorAll('.difficulty-button');
+        difficultyNotes = document.querySelectorAll('.difficulty-note');
+        grammarAudioBtn = document.getElementById('grammar-audio-btn');
+        generateNewBtn = document.getElementById('generate-new-btn');
+        scrambledWordEl = document.getElementById('scrambled-word');
+        wordGuessEl = document.getElementById('word-guess');
+        wordRushFeedbackEl = document.getElementById('word-rush-feedback');
+        wordRushMessageEl = document.getElementById('word-rush-message');
 
-            // Activate the selected button and content
-            button.classList.add('active', 'bg-indigo-600', 'text-white');
-            button.classList.remove('text-gray-700', 'hover:text-indigo-600');
-            document.getElementById(targetTab).classList.add('active');
+        streakCounter = document.getElementById('streak-counter');
+        
+        generateReadingBtn = document.getElementById('generate-reading-btn');
+        readingTitleEl = document.getElementById('reading-title');
+        readingPassageEl = document.getElementById('reading-passage');
+        questionsContainerEl = document.getElementById('questions-container');
 
-            // Load content for the active tab if needed
-            if (targetTab === 'grammar') {
-                 loadGrammarQuestion();
-            } else if (targetTab === 'word-rush') {
-                loadWordRushGame();
+        // Initial App setup after DOM is loaded
+        const APP_VERSION = '1.3.1';
+        document.getElementById('app-version').textContent = APP_VERSION;
+
+        // --- Firebase Auth & Data Management ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                const userDocRef = doc(db, 'artifacts', appId, 'users', userId, 'userData', 'userProgress');
+
+                const unsubscribe = onSnapshot(userDocRef, (doc) => {
+                    if (doc.exists()) {
+                        userData = doc.data();
+                    }
+                    updateDashboardUI();
+                }, (error) => {
+                    console.error("Error listening to Firestore updates:", error);
+                });
+
+                window.addEventListener('beforeunload', () => unsubscribe());
+            } else {
+                if (initialAuthToken) {
+                    try {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } catch (error) {
+                        console.error("Custom token sign-in failed. Signing in anonymously...", error);
+                        await signInAnonymously(auth);
+                    }
+                } else {
+                    await signInAnonymously(auth);
+                }
             }
         });
-    });
 
-    // --- Pronunciation Section Logic ---
-    if (recognition && synthesis) {
-        recognition.continuous = false;
-        recognition.lang = 'en-US';
-        recognition.interimResults = false;
-        recognition.maxAlternatives = 1;
-        
-        generatePhraseBtn.addEventListener('click', generateNewPhrase);
+        // Add event listeners
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetTab = button.dataset.tab;
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('active', 'bg-indigo-600', 'text-white');
+                    btn.classList.add('text-gray-700', 'hover:text-indigo-600');
+                });
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                });
+                button.classList.add('active', 'bg-indigo-600', 'text-white');
+                button.classList.remove('text-gray-700', 'hover:text-indigo-600');
+                document.getElementById(targetTab).classList.add('active');
 
-        playAudioBtn.addEventListener('click', () => {
-            const textToSpeak = practicePhraseInput.value;
-            const utterance = new SpeechSynthesisUtterance(textToSpeak);
-            utterance.lang = 'en-US';
-            synthesis.speak(utterance);
+                if (targetTab === 'grammar') {
+                    loadGrammarQuestion();
+                } else if (targetTab === 'word-rush') {
+                    loadWordRushGame();
+                } else if (targetTab === 'reading') {
+                    loadReadingMaterial();
+                }
+            });
         });
 
-        recordBtn.addEventListener('click', () => {
-            if (recordText.textContent === 'Record My Voice') {
-                recordText.textContent = 'Listening...';
-                recordBtn.classList.remove('bg-red-500');
-                recordBtn.classList.add('bg-blue-500');
-                resultText.textContent = 'Listening...';
-                suggestionText.textContent = '';
-                waveformContainer.classList.remove('hidden');
-                recognition.start();
-            } else {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const synthesis = window.speechSynthesis;
+        const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+
+        if (recognition && synthesis) {
+            recognition.continuous = false;
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            generatePhraseBtn.addEventListener('click', generateNewPhrase);
+
+            playAudioBtn.addEventListener('click', () => {
+                const textToSpeak = practicePhraseInput.value;
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                utterance.lang = 'en-US';
+                synthesis.speak(utterance);
+            });
+
+            recordBtn.addEventListener('click', () => {
+                if (recordText.textContent === 'Record My Voice') {
+                    recordText.textContent = 'Listening...';
+                    recordBtn.classList.remove('bg-red-500');
+                    recordBtn.classList.add('bg-blue-500');
+                    resultText.textContent = 'Listening...';
+                    suggestionText.textContent = '';
+                    waveformContainer.classList.remove('hidden');
+                    recognition.start();
+                } else {
+                    recordText.textContent = 'Record My Voice';
+                    recordBtn.classList.remove('bg-blue-500');
+                    recordBtn.classList.add('bg-red-500');
+                    waveformContainer.classList.add('hidden');
+                    recognition.stop();
+                }
+            });
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript.toLowerCase();
+                const targetPhrase = practicePhraseInput.value.toLowerCase();
+                
+                const { score, feedback, suggestion } = analyzePronunciation(transcript, targetPhrase);
+                
+                resultText.innerHTML = feedback;
+                suggestionText.textContent = suggestion;
+
+                if (score > 80) {
+                    resultText.innerHTML += ` Your score is ${score}%. Great job! Your pronunciation is clear and accurate.`;
+                    updateProgress();
+                } else if (score > 50) {
+                    resultText.innerHTML += ` Your score is ${score}%. Good attempt! Practice a little more to improve clarity.`;
+                } else {
+                    resultText.innerHTML += ` Your score is ${score}%. Keep trying! Your pronunciation needs more work.`;
+                }
+                
                 recordText.textContent = 'Record My Voice';
                 recordBtn.classList.remove('bg-blue-500');
                 recordBtn.classList.add('bg-red-500');
                 waveformContainer.classList.add('hidden');
-                recognition.stop();
-            }
-        });
+            };
 
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript.toLowerCase();
-            const targetPhrase = practicePhraseInput.value.toLowerCase();
-            
-            const { score, feedback, suggestion } = analyzePronunciation(transcript, targetPhrase);
-            
-            resultText.innerHTML = feedback;
-            suggestionText.textContent = suggestion;
-
-            if (score > 80) {
-                resultText.innerHTML += ` Your score is ${score}%. Great job! Your pronunciation is clear and accurate.`;
-                updateProgress();
-            } else if (score > 50) {
-                resultText.innerHTML += ` Your score is ${score}%. Good attempt! Practice a little more to improve clarity.`;
-            } else {
-                resultText.innerHTML += ` Your score is ${score}%. Keep trying! Your pronunciation needs more work.`;
-            }
-            
-            recordText.textContent = 'Record My Voice';
-            recordBtn.classList.remove('bg-blue-500');
-            recordBtn.classList.add('bg-red-500');
-            waveformContainer.classList.add('hidden');
-        };
-
-        recognition.onerror = (event) => {
-            resultText.textContent = `Error occurred in speech recognition: ${event.error}`;
-            suggestionText.textContent = '';
-            recordText.textContent = 'Record My Voice';
-            recordBtn.classList.remove('bg-blue-500');
-            recordBtn.classList.add('bg-red-500');
-            waveformContainer.classList.add('hidden');
-        };
-        
-        // New event listener for clicking words to hear audio
-        pronunciationFeedback.addEventListener('click', (event) => {
-            const clickedWordSpan = event.target.closest('.clickable-word');
-            if (clickedWordSpan) {
-                const wordToSpeak = clickedWordSpan.dataset.word;
-                if (wordToSpeak) {
-                    const utterance = new SpeechSynthesisUtterance(wordToSpeak);
-                    utterance.lang = 'en-US';
-                    synthesis.speak(utterance);
-                }
-            }
-        });
-
-        // Enhanced analysis function (simulated for demonstration)
-        function analyzePronunciation(transcript, targetPhrase) {
-            const transcriptWords = transcript.split(/\s+/).filter(word => word);
-            const targetWords = targetPhrase.split(/\s+/).filter(word => word);
-            
-            let correctCount = 0;
-            let feedbackHtml = `You said: "`;
-            let suggestionText = '';
-            let isMispronounced = false;
-
-            // This is a simple, simulated check. In a real app, this would require a more
-            // advanced NLP model or a service that returns phoneme-level data.
-            for (let i = 0; i < targetWords.length; i++) {
-                const targetWord = targetWords[i];
-                const spokenWord = transcriptWords[i] || '';
-                
-                if (spokenWord === targetWord) {
-                    feedbackHtml += `<span class="clickable-word" data-word="${targetWord}">${spokenWord}</span> `;
-                    correctCount++;
-                } else if (!isMispronounced) {
-                    // This is the first mispronounced word we've "identified"
-                    feedbackHtml += `<span class="highlight clickable-word" data-word="${targetWord}">${spokenWord || targetWord}</span> `;
-                    
-                    // Simple, hard-coded suggestions based on the first word
-                    switch(targetWord) {
-                        case 'how': suggestionText = "Suggestion: Remember the 'ow' sound, like in 'cow'."; break;
-                        case 'doing': suggestionText = "Suggestion: Focus on the '-ing' ending sound."; break;
-                        case 'today': suggestionText = "Suggestion: Emphasize the second syllable 'day'."; break;
-                        case 'great': suggestionText = "Suggestion: Make sure to clearly pronounce the 'r' sound."; break;
-                        default: suggestionText = "Suggestion: Try to enunciate this word more clearly.";
-                    }
-                    isMispronounced = true;
-                } else {
-                     feedbackHtml += `<span class="clickable-word" data-word="${targetWord}">${spokenWord}</span> `;
-                }
-            }
-            
-            feedbackHtml += `"`;
-
-            const similarity = correctCount / targetWords.length;
-            const score = Math.floor(similarity * 100);
-
-            return { score, feedback: feedbackHtml, suggestion: suggestionText };
-        }
-
-        async function generateNewPhrase() {
-            generatePhraseBtn.disabled = true;
-            const originalText = generatePhraseBtn.textContent;
-            generatePhraseBtn.innerHTML = `
-                <svg class="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>Generating...</span>
-            `;
-            
-            const userQuery = "Generate a single, short, grammatically correct English phrase for a learner to practice pronunciation. The phrase should be natural-sounding and not a common idiom. Return only the phrase itself.";
-            
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
+            recognition.onerror = (event) => {
+                resultText.textContent = `Error occurred in speech recognition: ${event.error}`;
+                suggestionText.textContent = '';
+                recordText.textContent = 'Record My Voice';
+                recordBtn.classList.remove('bg-blue-500');
+                recordBtn.classList.add('bg-red-500');
+                waveformContainer.classList.add('hidden');
             };
             
-            const apiKey = "";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-            let retries = 0;
-            const maxRetries = 3;
-            let delay = 1000;
-
-            while (retries < maxRetries) {
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (!response.ok) {
-                         if (response.status === 429) {
-                            throw new Error('Rate limit exceeded');
-                        }
-                        throw new Error('Network response was not ok');
-                    }
-
-                    const result = await response.json();
-                    const generatedText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-                    
-                    if (generatedText) {
-                        practicePhraseInput.value = generatedText.trim();
-                        resultText.textContent = "New phrase generated! Press 'Play Audio' to listen or 'Record My Voice' to practice.";
-                        suggestionText.textContent = '';
-                        break; // Exit the loop on success
-                    }
-
-                } catch (error) {
-                    retries++;
-                    if (retries < maxRetries) {
-                        await new Promise(res => setTimeout(res, delay));
-                        delay *= 2; // Exponential backoff
-                    } else {
-                        resultText.textContent = `Failed to generate a new phrase: ${error.message}`;
-                        suggestionText.textContent = '';
+            pronunciationFeedback.addEventListener('click', (event) => {
+                const clickedWordSpan = event.target.closest('.clickable-word');
+                if (clickedWordSpan) {
+                    const wordToSpeak = clickedWordSpan.dataset.word;
+                    if (wordToSpeak) {
+                        const utterance = new SpeechSynthesisUtterance(wordToSpeak);
+                        utterance.lang = 'en-US';
+                        synthesis.speak(utterance);
                     }
                 }
-            }
+            });
             
-            generatePhraseBtn.disabled = false;
-            generatePhraseBtn.innerHTML = originalText;
+            async function generateNewPhrase() {
+                generatePhraseBtn.disabled = true;
+                const originalText = generatePhraseBtn.innerHTML;
+                generatePhraseBtn.innerHTML = `
+                    <svg class="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Generating...</span>
+                `;
+                
+                const userQuery = "Generate a single, short, grammatically correct English phrase for a learner to practice pronunciation. The phrase should be natural-sounding and not a common idiom. Return only the phrase itself.";
+                
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                };
+                
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                let retries = 0;
+                const maxRetries = 3;
+                let delay = 1000;
+
+                while (retries < maxRetries) {
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                             if (response.status === 429) {
+                                throw new Error('Rate limit exceeded');
+                             }
+                            throw new Error('Network response was not ok');
+                        }
+
+                        const result = await response.json();
+                        const generatedText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                        
+                        if (generatedText) {
+                            practicePhraseInput.value = generatedText.trim();
+                            resultText.textContent = "New phrase generated! Press 'Play Audio' to listen or 'Record My Voice' to practice.";
+                            suggestionText.textContent = '';
+                            break;
+                        }
+
+                    } catch (error) {
+                        retries++;
+                        if (retries < maxRetries) {
+                            await new Promise(res => setTimeout(res, delay));
+                            delay *= 2;
+                        } else {
+                            resultText.textContent = `Failed to generate a new phrase: ${error.message}`;
+                            suggestionText.textContent = '';
+                        }
+                    }
+                }
+                
+                generatePhraseBtn.disabled = false;
+                generatePhraseBtn.innerHTML = originalText;
+            }
+
+        } else {
+            recordBtn.disabled = true;
+            recordBtn.textContent = 'Not Supported';
+            playAudioBtn.disabled = true;
+            playAudioBtn.textContent = 'Not Supported';
+            generatePhraseBtn.disabled = true;
+            generatePhraseBtn.textContent = 'Not Supported';
+            browserWarning.classList.remove('hidden');
         }
 
-    } else {
-        // If API is not supported
-        recordBtn.disabled = true;
-        recordBtn.textContent = 'Not Supported';
-        playAudioBtn.disabled = true;
-        playAudioBtn.textContent = 'Not Supported';
-        generatePhraseBtn.disabled = true;
-        generatePhraseBtn.textContent = 'Not Supported';
-        browserWarning.classList.remove('hidden');
+        difficultyButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                currentDifficulty = button.dataset.difficulty;
+                difficultyButtons.forEach(btn => {
+                    btn.classList.remove('active', 'bg-indigo-600', 'text-white');
+                    btn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                });
+                button.classList.add('active', 'bg-indigo-600', 'text-white');
+                
+                difficultyNotes.forEach(note => {
+                    note.classList.add('hidden');
+                    note.classList.remove('active');
+                });
+                document.querySelector(`[data-difficulty-note="${currentDifficulty}"]`).classList.remove('hidden');
+                document.querySelector(`[data-difficulty-note="${currentDifficulty}"]`).classList.add('active');
+                
+                loadGrammarQuestion();
+            });
+        });
+
+        generateNewBtn.addEventListener('click', loadGrammarQuestion);
+        grammarAudioBtn.addEventListener('click', () => {
+            if (currentQuestion && currentQuestion.question) {
+                const utterance = new SpeechSynthesisUtterance(currentQuestion.question.replace(/[_]/g, ' '));
+                utterance.lang = 'en-US';
+                synthesis.speak(utterance);
+            }
+        });
+        
+        generateReadingBtn.addEventListener('click', loadReadingMaterial);
+        checkWordBtn.addEventListener('click', () => {
+            const guess = wordGuessEl.value.toLowerCase().trim();
+            if (guess === currentWord) {
+                wordRushMessageEl.textContent = `Correct! You unscrambled "${currentWord}".`;
+                updateProgress(10);
+                setTimeout(loadWordRushGame, 2000);
+            } else {
+                wordRushMessageEl.textContent = `Incorrect. Keep trying!`;
+            }
+        });
+    });
+
+    // --- Core App Logic Functions ---
+    function updateDashboardUI() {
+        if (streakCounter) {
+            streakCounter.textContent = userData.streak;
+        }
     }
 
-    // --- Grammar Section Logic ---
-    
-    async function getNewGrammarQuestion(difficulty) {
-        const systemPrompt = `You are a seasoned English teacher. Generate a single JSON object for a grammar drill question at a ${difficulty} difficulty level. The question should test a specific grammar rule in a contextual sentence, not just a single word.`;
-        const prompt = `Generate a JSON object with the following structure:
-        {
-            "question": "A complete sentence with a blank space indicated by an underscore, like 'She _ to the store every day.'",
-            "options": ["A list of four plausible choices for the blank."],
-            "answer": "The single correct answer from the options.",
-            "explanation": "A concise explanation of the grammar rule being tested and why the answer is correct."
+    async function updateProgress(points = 10) {
+        if (!userId) {
+            console.error("User not authenticated.");
+            return;
         }
-        Ensure the explanation is clear and helpful for a learner. The question should not simply be a fill-in-the-blank but should require understanding of sentence structure and verb tenses.`;
+
+        const today = new Date().toDateString();
+        const userDocRef = doc(db, 'artifacts', appId, 'users', userId, 'userData', 'userProgress');
+
+        let newStreak = userData.streak;
+        if (userData.lastCompletionDate !== today) {
+            newStreak = (userData.lastCompletionDate) ? newStreak + 1 : 1;
+        }
+
+        const updatedData = {
+            streak: newStreak,
+            lastCompletionDate: today
+        };
+
+        try {
+            await setDoc(userDocRef, updatedData, { merge: true });
+        } catch (e) {
+            console.error("Error updating progress: ", e);
+        }
+    }
+    
+    function analyzePronunciation(transcript, targetPhrase) {
+        const transcriptWords = transcript.split(/\s+/).filter(word => word);
+        const targetWords = targetPhrase.split(/\s+/).filter(word => word);
+        
+        let correctCount = 0;
+        let feedbackHtml = `You said: "`;
+        let suggestionText = '';
+        let isMispronounced = false;
+
+        for (let i = 0; i < targetWords.length; i++) {
+            const targetWord = targetWords[i];
+            const spokenWord = transcriptWords[i] || '';
+            
+            if (spokenWord === targetWord) {
+                feedbackHtml += `<span class="clickable-word" data-word="${targetWord}">${spokenWord}</span> `;
+                correctCount++;
+            } else {
+                feedbackHtml += `<span class="highlight clickable-word" data-word="${targetWord}">${spokenWord || '...'}</span> `;
+                if (!isMispronounced) {
+                    suggestionText = `Suggestion: It seems you had trouble with "${targetWord}". Try to enunciate the word clearly.`;
+                    isMispronounced = true;
+                }
+            }
+        }
+        
+        feedbackHtml += `"`;
+
+        const similarity = correctCount / targetWords.length;
+        const score = Math.floor(similarity * 100);
+
+        return { score, feedback: feedbackHtml, suggestion: suggestionText };
+    }
+
+    async function getNewGrammarQuestion(difficulty) {
+        const prompt = `Generate a JSON object for a grammar drill question at a "${difficulty}" difficulty level.
+        The question should test a specific grammar rule in a contextual sentence, not just a single word.
+        Provide a question with a blank space indicated by an underscore, four plausible options, the single correct answer, and a concise explanation.
+        Example response format:
+        {
+            "question": "She ___ to the store every day.",
+            "options": ["go", "goes", "went", "going"],
+            "answer": "goes",
+            "explanation": "This tests subject-verb agreement in the simple present tense. The verb 'go' must be changed to 'goes' to agree with the third-person singular subject 'she'."
+        }
+        The question and explanation should be clear and helpful for a learner.`;
         
         const payload = {
             contents: [{ parts: [{ text: prompt }] }],
@@ -555,221 +680,262 @@
                     "propertyOrdering": ["question", "options", "answer", "explanation"]
                 }
             },
-            systemInstruction: {
-                parts: [{ text: systemPrompt }]
-            }
         };
 
         const apiKey = "";
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-        
-        let retries = 0;
-        const maxRetries = 3;
-        let delay = 1000;
 
-        while (retries < maxRetries) {
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
 
-                if (!response.ok) {
-                     if (response.status === 429) {
-                        throw new Error('Rate limit exceeded');
-                    }
-                    throw new Error('Network response was not ok');
-                }
-
-                const result = await response.json();
-                const generatedJson = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-                if (generatedJson) {
-                     // Parse the JSON and return the question object
-                    return JSON.parse(generatedJson);
-                }
-            } catch (error) {
-                retries++;
-                if (retries < maxRetries) {
-                    await new Promise(res => setTimeout(res, delay));
-                    delay *= 2;
-                } else {
-                    console.error(`Failed to generate question: ${error.message}`);
-                    // Return a fallback question
-                    return {
-                        question: "The little boy _ a sandcastle at the beach.",
-                        options: ["builds", "built", "build", "will build"],
-                        answer: "built",
-                        explanation: "The sentence describes an action in the past, so the simple past tense 'built' is the correct form."
-                    };
-                }
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
+            const result = await response.json();
+            const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (jsonText) {
+                return JSON.parse(jsonText);
+            }
+        } catch (error) {
+            console.error("Failed to generate grammar question:", error);
         }
-    }
-
-    async function renderQuestion(question) {
-        grammarQuestionEl.innerHTML = question.question.replace(/_/g, `<span class="inline-block w-20 border-b-2 border-gray-400 mx-1"></span>`);
-        grammarOptionsEl.innerHTML = '';
-        grammarFeedbackEl.textContent = 'Select an option above to see feedback.';
-        grammarFeedbackEl.classList.remove('text-green-600', 'text-red-600');
-        
-        question.options.forEach(option => {
-            const button = document.createElement('button');
-            button.textContent = option;
-            button.classList.add('grammar-option-btn', 'p-3', 'rounded-lg', 'font-medium', 'text-gray-700', 'bg-white', 'border', 'border-gray-300', 'hover:bg-indigo-50', 'transition', 'duration-300');
-            button.addEventListener('click', () => checkGrammarAnswer(option, button));
-            grammarOptionsEl.appendChild(button);
-        });
+        return null;
     }
 
     async function loadGrammarQuestion() {
-        generateNewBtn.disabled = true;
-        generateNewBtn.textContent = 'Loading...';
-        
+        grammarQuestionEl.textContent = 'Loading...';
+        grammarOptionsEl.innerHTML = '';
+        grammarFeedbackEl.textContent = 'Please wait...';
+
         currentQuestion = await getNewGrammarQuestion(currentDifficulty);
-        renderQuestion(currentQuestion);
-        
-        generateNewBtn.disabled = false;
-        generateNewBtn.textContent = 'New Question';
-    }
 
-    function checkGrammarAnswer(selectedAnswer, clickedButton) {
-        const isCorrect = selectedAnswer.toLowerCase() === currentQuestion.answer.toLowerCase();
-
-        // Disable all buttons
-        const optionButtons = grammarOptionsEl.querySelectorAll('button');
-        optionButtons.forEach(btn => btn.disabled = true);
-        
-        if (isCorrect) {
-            grammarFeedbackEl.textContent = `✔️ Correct! ` + currentQuestion.explanation;
-            grammarFeedbackEl.classList.remove('text-red-600');
-            grammarFeedbackEl.classList.add('text-green-600');
-            updateProgress();
-
-            // Highlight the correct button
-            clickedButton.classList.remove('bg-white', 'hover:bg-indigo-50', 'bg-indigo-500', 'text-white', 'hover:bg-indigo-600');
-            clickedButton.classList.add('bg-green-500', 'text-white');
-
-        } else {
-            grammarFeedbackEl.textContent = `❌ Incorrect. The correct answer is "${currentQuestion.answer}". ` + currentQuestion.explanation;
-            grammarFeedbackEl.classList.remove('text-green-600');
-            grammarFeedbackEl.classList.add('text-red-600');
-            
-            // Find and highlight the correct answer
-            const correctButton = Array.from(optionButtons).find(btn => btn.textContent.toLowerCase() === currentQuestion.answer.toLowerCase());
-            if (correctButton) {
-                correctButton.classList.remove('bg-white', 'hover:bg-indigo-50', 'bg-indigo-500');
-                correctButton.classList.add('bg-green-500', 'text-white');
-            }
-             // Highlight the incorrect button
-            clickedButton.classList.remove('bg-white', 'hover:bg-indigo-50', 'bg-indigo-500', 'text-white', 'hover:bg-indigo-600');
-            clickedButton.classList.add('bg-red-500', 'text-white');
-        }
-    }
-
-    // Difficulty level selection
-    difficultyButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const newDifficulty = button.dataset.difficulty;
-            currentDifficulty = newDifficulty;
-
-            difficultyButtons.forEach(btn => {
-                btn.classList.remove('bg-indigo-600', 'text-white');
-                btn.classList.add('bg-gray-200', 'text-gray-700');
-            });
-            button.classList.remove('bg-gray-200', 'text-gray-700');
-            button.classList.add('bg-indigo-600', 'text-white');
-
-            // Show the correct note
-            difficultyNotes.forEach(note => {
-                if (note.dataset.difficultyNote === newDifficulty) {
-                    note.classList.remove('hidden');
-                } else {
-                    note.classList.add('hidden');
-                }
-            });
-            
-            loadGrammarQuestion();
-        });
-    });
-
-    // "Generate New" button gets a fresh question from the LLM
-    generateNewBtn.addEventListener('click', () => {
-         loadGrammarQuestion();
-    });
-
-    // TTS for grammar questions
-    grammarAudioBtn.addEventListener('click', () => {
         if (currentQuestion) {
-            // Remove the fill-in-the-blank placeholder for a smoother reading
-            const textToSpeak = currentQuestion.question.replace(/_/g, '');
-            const utterance = new SpeechSynthesisUtterance(textToSpeak);
-            utterance.lang = 'en-US';
-            synthesis.speak(utterance);
+            grammarQuestionEl.textContent = currentQuestion.question;
+            grammarOptionsEl.innerHTML = '';
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.className = "py-2 px-4 rounded-lg font-medium text-gray-700 bg-white border border-gray-300 hover:bg-indigo-100 hover:text-indigo-800 transition duration-300 text-left";
+                button.addEventListener('click', () => handleGrammarAnswer(option));
+                grammarOptionsEl.appendChild(button);
+            });
+            grammarFeedbackEl.textContent = 'Select an option above to see feedback.';
+        } else {
+            grammarQuestionEl.textContent = 'Failed to load question.';
+            grammarFeedbackEl.textContent = 'Please try again.';
         }
-    });
+    }
 
+    function handleGrammarAnswer(selectedOption) {
+        if (!currentQuestion) return;
 
-    // --- Word Rush Logic ---
+        const allOptions = grammarOptionsEl.querySelectorAll('button');
+        allOptions.forEach(button => {
+            button.disabled = true;
+            if (button.textContent === currentQuestion.answer) {
+                button.classList.remove('bg-gray-200');
+                button.classList.add('bg-green-500', 'text-white', 'hover:bg-green-600');
+            } else if (button.textContent === selectedOption) {
+                button.classList.remove('bg-gray-200');
+                button.classList.add('bg-red-500', 'text-white', 'hover:bg-red-600');
+            }
+        });
+
+        if (selectedOption === currentQuestion.answer) {
+            grammarFeedbackEl.textContent = "Correct! " + currentQuestion.explanation;
+            updateProgress();
+        } else {
+            grammarFeedbackEl.textContent = `Incorrect. The correct answer is "${currentQuestion.answer}". ` + currentQuestion.explanation;
+        }
+    }
+    
+    async function getReadingMaterial() {
+        const prompt = `Generate a JSON object for an English reading comprehension exercise. The passage should be around 150-200 words on an interesting topic, like nature, science, or history. The object should include a title, the full passage, and an array of exactly 10 multiple-choice questions. Each question object must have a 'text' field, an array of four 'options', and a 'correctAnswer' field. Additionally, each question should have a 'difficulty' field set to either 'easy', 'medium', or 'hard'.
+        Example JSON format:
+        {
+            "title": "The Life Cycle of a Butterfly",
+            "passage": "A butterfly's life is a fascinating journey that has four distinct stages: egg, larva, pupa, and adult. The cycle begins when a female butterfly lays eggs on a leaf or a stem. Once the egg hatches, a larva, or caterpillar, emerges...",
+            "questions": [
+                {
+                    "text": "How many stages are there in a butterfly's life cycle?",
+                    "options": ["Two", "Three", "Four", "Five"],
+                    "correctAnswer": "Four",
+                    "difficulty": "easy"
+                },
+                {
+                    "text": "What is a butterfly larva called?",
+                    "options": ["A chrysalis", "A pupa", "A moth", "A caterpillar"],
+                    "correctAnswer": "A caterpillar",
+                    "difficulty": "medium"
+                },
+                {
+                    "text": "What is the primary purpose of the caterpillar stage?",
+                    "options": ["To find a mate", "To migrate", "To grow and eat", "To lay eggs"],
+                    "correctAnswer": "To grow and eat",
+                    "difficulty": "hard"
+                }
+            ]
+        }`;
+
+        const payload = {
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: "OBJECT",
+                    properties: {
+                        "title": { "type": "STRING" },
+                        "passage": { "type": "STRING" },
+                        "questions": {
+                            "type": "ARRAY",
+                            "items": {
+                                "type": "OBJECT",
+                                "properties": {
+                                    "text": { "type": "STRING" },
+                                    "options": {
+                                        "type": "ARRAY",
+                                        "items": { "type": "STRING" }
+                                    },
+                                    "correctAnswer": { "type": "STRING" },
+                                    "difficulty": { "type": "STRING" }
+                                }
+                            }
+                        }
+                    },
+                    "propertyOrdering": ["title", "passage", "questions"]
+                }
+            },
+        };
+
+        const apiKey = "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const result = await response.json();
+            const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (jsonText) {
+                return JSON.parse(jsonText);
+            }
+        } catch (error) {
+            console.error("Failed to generate reading material:", error);
+        }
+        return null;
+    }
+
+    async function loadReadingMaterial() {
+        generateReadingBtn.disabled = true;
+        generateReadingBtn.textContent = 'Generating...';
+        readingTitleEl.textContent = 'Loading...';
+        readingPassageEl.textContent = '';
+        questionsContainerEl.innerHTML = '';
+        
+        const material = await getReadingMaterial();
+
+        if (material) {
+            readingTitleEl.textContent = material.title;
+            readingPassageEl.textContent = material.passage;
+            currentReadingQuestions = material.questions;
+            renderReadingQuestions();
+        } else {
+            readingTitleEl.textContent = 'Failed to load material.';
+            readingPassageEl.textContent = 'Please try again.';
+        }
+        
+        generateReadingBtn.disabled = false;
+        generateReadingBtn.textContent = 'Generate New Reading Material';
+    }
+
+    function renderReadingQuestions() {
+        questionsContainerEl.innerHTML = '';
+        currentReadingQuestions.forEach((q, index) => {
+            const questionCard = document.createElement('div');
+            questionCard.className = 'bg-white p-4 rounded-lg shadow-sm border border-gray-200';
+            questionCard.innerHTML = `
+                <div class="flex items-center justify-between mb-2">
+                    <p class="font-medium text-gray-800">Question ${index + 1}:</p>
+                    <span class="text-xs font-semibold px-2 py-1 rounded-full capitalize ${q.difficulty === 'easy' ? 'bg-green-100 text-green-800' : q.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}">
+                        ${q.difficulty}
+                    </span>
+                </div>
+                <p class="mb-4 text-gray-700">${q.text}</p>
+                <div class="options-container space-y-2">
+                    ${q.options.map((option, i) => `
+                        <button class="w-full text-left px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 transition duration-300 option-button" data-index="${index}" data-option="${option}">
+                            ${option}
+                        </button>
+                    `).join('')}
+                </div>
+                <p class="mt-4 text-sm font-medium feedback-text" id="feedback-${index}"></p>
+            `;
+            questionsContainerEl.appendChild(questionCard);
+        });
+
+        document.querySelectorAll('.option-button').forEach(button => {
+            button.addEventListener('click', handleReadingAnswer);
+        });
+    }
+
+    function handleReadingAnswer(event) {
+        const button = event.currentTarget;
+        const questionIndex = parseInt(button.dataset.index);
+        const selectedOption = button.dataset.option;
+        const question = currentReadingQuestions[questionIndex];
+        const feedbackEl = document.getElementById(`feedback-${questionIndex}`);
+        const optionsContainer = button.parentElement;
+
+        if (selectedOption === question.correctAnswer) {
+            feedbackEl.textContent = 'Correct!';
+            feedbackEl.classList.remove('text-red-600');
+            feedbackEl.classList.add('text-green-600');
+            updateProgress();
+        } else {
+            feedbackEl.textContent = `Incorrect. The correct answer is: ${question.correctAnswer}`;
+            feedbackEl.classList.remove('text-green-600');
+            feedbackEl.classList.add('text-red-600');
+        }
+
+        Array.from(optionsContainer.children).forEach(optionBtn => {
+            optionBtn.disabled = true;
+            if (optionBtn.dataset.option === question.correctAnswer) {
+                optionBtn.classList.remove('bg-gray-50', 'text-gray-700', 'hover:bg-gray-100');
+                optionBtn.classList.add('bg-green-500', 'text-white', 'hover:bg-green-600');
+            } else {
+                optionBtn.classList.remove('bg-gray-50', 'text-gray-700', 'hover:bg-gray-100');
+                optionBtn.classList.add('bg-red-500', 'text-white', 'hover:bg-red-600');
+            }
+        });
+    }
+
     function scrambleWord(word) {
-        return word.split('').sort(() => 0.5 - Math.random()).join('');
+        let a = word.split("");
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a.join("");
     }
 
     function loadWordRushGame() {
-        currentWord = wordList[Math.floor(Math.random() * wordList.length)];
+        const randomIndex = Math.floor(Math.random() * wordList.length);
+        currentWord = wordList[randomIndex];
         const scrambled = scrambleWord(currentWord);
-        document.getElementById('scrambled-word').textContent = scrambled.toUpperCase();
-        document.getElementById('word-guess').value = '';
-        document.getElementById('word-rush-message').textContent = 'Type your guess and click "Check Answer".';
-        document.getElementById('word-rush-message').classList.remove('text-red-600', 'text-green-600');
+        scrambledWordEl.textContent = scrambled;
+        wordGuessEl.value = '';
+        wordRushMessageEl.textContent = 'Type your guess and click "Check Answer".';
     }
-
-    checkWordBtn.addEventListener('click', () => {
-        const guess = document.getElementById('word-guess').value.toLowerCase();
-        const messageEl = document.getElementById('word-rush-message');
-
-        if (guess === currentWord) {
-            messageEl.textContent = "Correct! You got it!";
-            messageEl.classList.remove('text-red-600');
-            messageEl.classList.add('text-green-600');
-            updateProgress();
-            setTimeout(loadWordRushGame, 1500);
-        } else {
-            messageEl.textContent = "Incorrect. Try again!";
-            messageEl.classList.remove('text-green-600');
-            messageEl.classList.add('text-red-600');
-        }
-    });
-
-
-    // --- Dashboard & Gamification Logic ---
-    function updateDashboardUI() {
-        streakCounter.textContent = streak;
-        progressText.textContent = `${progress}%`;
-        progressCircle.style.setProperty('--progress', progress);
-    }
-
-    function updateProgress() {
-        const today = new Date().toLocaleDateString();
-        if (lastCompletionDate !== today) {
-            streak++;
-            lastCompletionDate = today;
-            localStorage.setItem('streak', streak);
-            localStorage.setItem('lastCompletionDate', today);
-        }
-        progress = Math.min(100, progress + 10);
-        localStorage.setItem('progress', progress);
-        updateDashboardUI();
-    }
-
-    // Initial load
-    window.onload = () => {
-        updateDashboardUI();
-        loadGrammarQuestion();
-        loadWordRushGame();
-    };
-
 </script>
 </body>
 </html>
