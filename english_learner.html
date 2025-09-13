@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Phrase Learner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .container {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 1rem;
+            background-color: #e0f2fe; /* Light blue background */
+        }
+        .card {
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        .phrase-box {
+            background-color: #bfdbfe; /* A slightly darker blue for the phrase */
+            padding: 1.5rem;
+            border-radius: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .phrase-box:hover {
+            background-color: #93c5fd; /* Darker on hover */
+        }
+        .hidden-response {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #d1fae5; /* Light green for the response */
+            border-radius: 1rem;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .speak-button {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        .speak-button:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-6">English Conversation Practice</h1>
+        <p class="text-gray-600 mb-8 text-center px-4">Click the box to reveal a common response and practice your conversational English!</p>
+
+        <div class="card">
+            <div id="phrase-box" class="phrase-box">
+                <p id="phrase-text" class="text-xl md:text-2xl font-semibold text-gray-800">Hello, how's it going?</p>
+                <button id="speak-button" class="speak-button" aria-label="Listen to phrase">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.121-7.072a8 8 0 010 11.314m-7.072-11.314a2 2 0 010 2.828m-2.122-2.828a5 5 0 010 7.072m2.121-7.072a8 8 0 010 11.314" />
+                    </svg>
+                </button>
+            </div>
+            
+            <div id="response-box" class="hidden-response">
+                <p id="response-text" class="text-xl md:text-2xl text-gray-700"></p>
+            </div>
+            
+            <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mt-8">
+                <button id="next-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-lg flex-1">Next Phrase</button>
+                <button id="switch-roles-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-lg flex-1">Switch Roles</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const phrases = [
+            { phrase: "Hello, how's it going?", response: "I'm doing great, thanks! How about you?" },
+            { phrase: "I'm a little bit under the weather today.", response: "Oh no, I'm sorry to hear that. I hope you feel better soon!" },
+            { phrase: "What do you do for a living?", response: "I work as a software developer. It's a challenging but rewarding job." },
+            { phrase: "It was nice talking to you.", response: "You too! Have a great day." },
+            { phrase: "Could you tell me how to get to the library?", response: "Of course. Go straight down this road and it'll be on your right." },
+            { phrase: "I'm looking forward to the weekend.", response: "Me too! Do you have any plans?" },
+            { phrase: "What's your favorite kind of food?", response: "I love Italian food, especially pasta." },
+            { phrase: "Long time no see!", response: "Wow, it has been! How have you been?" },
+            { phrase: "Let's grab a coffee sometime.", response: "That sounds great! How about Tuesday?" }
+        ];
+
+        let currentPhraseIndex = 0;
+        let isRolesSwitched = false;
+
+        const phraseBox = document.getElementById('phrase-box');
+        const phraseText = document.getElementById('phrase-text');
+        const responseBox = document.getElementById('response-box');
+        const responseText = document.getElementById('response-text');
+        const nextButton = document.getElementById('next-button');
+        const speakButton = document.getElementById('speak-button');
+        const switchRolesButton = document.getElementById('switch-roles-button');
+
+        // Function to update the displayed phrases based on the current state
+        function updatePhrase() {
+            const currentPair = phrases[currentPhraseIndex];
+            if (isRolesSwitched) {
+                phraseText.textContent = currentPair.response;
+                responseText.textContent = currentPair.phrase;
+            } else {
+                phraseText.textContent = currentPair.phrase;
+                responseText.textContent = currentPair.response;
+            }
+            // Hide the response for the new phrase
+            responseBox.style.opacity = '0';
+            responseBox.style.display = 'none';
+        }
+
+        // Function to use the Web Speech API to speak the phrase
+        function speakPhrase(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            speechSynthesis.speak(utterance);
+        }
+
+        // Event listeners
+        phraseBox.addEventListener('click', (event) => {
+            // Prevent the click on the speaker button from triggering the box toggle
+            if (event.target.closest('#speak-button')) {
+                return;
+            }
+            if (responseBox.style.display === 'none') {
+                responseBox.style.display = 'block';
+                setTimeout(() => {
+                    responseBox.style.opacity = '1';
+                }, 10);
+            } else {
+                responseBox.style.opacity = '0';
+                setTimeout(() => {
+                    responseBox.style.display = 'none';
+                }, 500);
+            }
+        });
+
+        nextButton.addEventListener('click', () => {
+            currentPhraseIndex = (currentPhraseIndex + 1) % phrases.length;
+            updatePhrase();
+        });
+
+        switchRolesButton.addEventListener('click', () => {
+            isRolesSwitched = !isRolesSwitched;
+            updatePhrase();
+        });
+
+        speakButton.addEventListener('click', () => {
+            speakPhrase(phraseText.textContent);
+        });
+
+        // Initialize with the first phrase
+        updatePhrase();
+    </script>
+</body>
+</html>
