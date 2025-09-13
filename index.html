@@ -174,12 +174,10 @@
 
                 <div class="flex flex-col md:flex-row md:items-center justify-between mb-4">
                     <!-- Difficulty and Points -->
-                    <div class="flex items-center space-x-4 mb-4 md:mb-0">
-                        <div class="flex space-x-2">
-                            <button data-difficulty="beginner" class="difficulty-button active px-3 py-1 text-sm font-medium rounded-full bg-indigo-600 text-white transition duration-300">Beginner</button>
-                            <button data-difficulty="intermediate" class="difficulty-button px-3 py-1 text-sm font-medium rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition duration-300">Intermediate</button>
-                            <button data-difficulty="advanced" class="difficulty-button px-3 py-1 text-sm font-medium rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition duration-300">Advanced</button>
-                        </div>
+                    <div class="flex space-x-2">
+                        <button data-difficulty="beginner" class="difficulty-button active px-3 py-1 text-sm font-medium rounded-full bg-indigo-600 text-white transition duration-300">Beginner</button>
+                        <button data-difficulty="intermediate" class="difficulty-button px-3 py-1 text-sm font-medium rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition duration-300">Intermediate</button>
+                        <button data-difficulty="advanced" class="difficulty-button px-3 py-1 text-sm font-medium rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition duration-300">Advanced</button>
                     </div>
 
                     <!-- Navigation Buttons -->
@@ -257,53 +255,55 @@
     let currentQuestion = null;
     let currentWord = '';
     const wordList = ["apple", "banana", "orange", "grape", "strawberry", "pineapple", "blueberry", "kiwi", "keyboard", "computer", "mountain", "ocean", "bicycle", "building", "guitar"];
-    
-    // Defer all DOM element queries and logic until the document is ready
-    document.addEventListener('DOMContentLoaded', async () => {
-        // Initialize Firebase
+
+    // Initialize Firebase and set up auth listener immediately
+    try {
         app = initializeApp(firebaseConfig);
         auth = getAuth(app);
         db = getFirestore(app);
-        
-        // UI Elements - Moved inside to ensure they are available
-        const tabButtons = document.querySelectorAll('.tab-button');
-        const tabContents = document.querySelectorAll('.tab-content');
-        const recordBtn = document.getElementById('record-btn');
-        const recordText = document.getElementById('record-text');
-        const pronunciationFeedback = document.getElementById('pronunciation-feedback');
-        const resultText = document.getElementById('result-text');
-        const suggestionText = document.getElementById('suggestion-text');
-        const browserWarning = document.getElementById('browser-warning');
-        const checkWordBtn = document.getElementById('check-word-btn');
-        const playAudioBtn = document.getElementById('play-audio-btn');
-        const practicePhraseInput = document.getElementById('practice-phrase');
-        const waveformContainer = document.getElementById('waveform-container');
-        const generatePhraseBtn = document.getElementById('generate-phrase-btn');
-
-        const grammarQuestionEl = document.getElementById('grammar-question');
-        const grammarOptionsEl = document.getElementById('grammar-options');
-        const grammarFeedbackEl = document.getElementById('grammar-feedback');
-        const difficultyButtons = document.querySelectorAll('.difficulty-button');
-        const difficultyNotes = document.querySelectorAll('.difficulty-note');
-        const grammarAudioBtn = document.getElementById('grammar-audio-btn');
-        const generateNewBtn = document.getElementById('generate-new-btn');
-        const scrambledWordEl = document.getElementById('scrambled-word');
-        const wordGuessEl = document.getElementById('word-guess');
-        const wordRushFeedbackEl = document.getElementById('word-rush-feedback');
-        const wordRushMessageEl = document.getElementById('word-rush-message');
-
-        const streakCounter = document.getElementById('streak-counter');
-        
-        // Set App Version
-        const APP_VERSION = '1.3.1';
-        document.getElementById('app-version').textContent = APP_VERSION;
-
-        // --- Core App Logic Functions (moved inside) ---
+    } catch (e) {
+        console.error("Firebase initialization failed: ", e);
+    }
+    
+    // Defer all DOM element queries and logic until the document is ready
+    document.addEventListener('DOMContentLoaded', async () => {
+        // --- Core App Logic Functions (defined first for clarity) ---
         function updateDashboardUI() {
+            const streakCounter = document.getElementById('streak-counter');
             if (streakCounter) {
                 streakCounter.textContent = userData.streak;
             }
         }
+        
+        // This is called when the authentication state changes
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                const userDocRef = doc(db, 'artifacts', appId, 'users', userId, 'userData', 'userProgress');
+
+                const unsubscribe = onSnapshot(userDocRef, (doc) => {
+                    if (doc.exists()) {
+                        userData = doc.data();
+                    }
+                    updateDashboardUI();
+                }, (error) => {
+                    console.error("Error listening to Firestore updates:", error);
+                });
+
+                window.addEventListener('beforeunload', () => unsubscribe());
+            } else {
+                if (initialAuthToken) {
+                    try {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } catch (error) {
+                        console.error("Custom token sign-in failed. Signing in anonymously...", error);
+                        await signInAnonymously(auth);
+                    }
+                } else {
+                    await signInAnonymously(auth);
+                }
+            }
+        });
         
         function scrambleWord(word) {
             let a = word.split("");
@@ -315,6 +315,9 @@
         }
     
         function loadWordRushGame() {
+            const scrambledWordEl = document.getElementById('scrambled-word');
+            const wordGuessEl = document.getElementById('word-guess');
+            const wordRushMessageEl = document.getElementById('word-rush-message');
             const randomIndex = Math.floor(Math.random() * wordList.length);
             currentWord = wordList[randomIndex];
             const scrambled = scrambleWord(currentWord);
@@ -381,6 +384,10 @@
         }
 
         async function loadGrammarQuestion() {
+            const grammarQuestionEl = document.getElementById('grammar-question');
+            const grammarOptionsEl = document.getElementById('grammar-options');
+            const grammarFeedbackEl = document.getElementById('grammar-feedback');
+            
             grammarQuestionEl.textContent = 'Loading...';
             grammarOptionsEl.innerHTML = '';
             grammarFeedbackEl.textContent = 'Please wait...';
@@ -405,6 +412,9 @@
         }
 
         function handleGrammarAnswer(selectedOption) {
+            const grammarOptionsEl = document.getElementById('grammar-options');
+            const grammarFeedbackEl = document.getElementById('grammar-feedback');
+            
             if (!currentQuestion) return;
 
             const allOptions = grammarOptionsEl.querySelectorAll('button');
@@ -440,7 +450,7 @@
                 const targetWord = targetWords[i];
                 const spokenWord = transcriptWords[i] || '';
                 
-                if (spokenWord === targetWord) {
+                if (spokenWord.toLowerCase() === targetWord.toLowerCase()) {
                     feedbackHtml += `<span class="clickable-word" data-word="${targetWord}">${spokenWord}</span> `;
                     correctCount++;
                 } else {
@@ -486,37 +496,35 @@
             }
         }
         
-        // --- Firebase Auth & Data Management ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                userId = user.uid;
-                const userDocRef = doc(db, 'artifacts', appId, 'users', userId, 'userData', 'userProgress');
-
-                const unsubscribe = onSnapshot(userDocRef, (doc) => {
-                    if (doc.exists()) {
-                        userData = doc.data();
-                    }
-                    updateDashboardUI();
-                }, (error) => {
-                    console.error("Error listening to Firestore updates:", error);
-                });
-
-                window.addEventListener('beforeunload', () => unsubscribe());
-            } else {
-                if (initialAuthToken) {
-                    try {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } catch (error) {
-                        console.error("Custom token sign-in failed. Signing in anonymously...", error);
-                        await signInAnonymously(auth);
-                    }
-                } else {
-                    await signInAnonymously(auth);
-                }
-            }
-        });
-
-        // Add event listeners
+        // --- DOM Element Selection and Event Listeners ---
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const recordBtn = document.getElementById('record-btn');
+        const recordText = document.getElementById('record-text');
+        const pronunciationFeedback = document.getElementById('pronunciation-feedback');
+        const resultText = document.getElementById('result-text');
+        const suggestionText = document.getElementById('suggestion-text');
+        const browserWarning = document.getElementById('browser-warning');
+        const checkWordBtn = document.getElementById('check-word-btn');
+        const playAudioBtn = document.getElementById('play-audio-btn');
+        const practicePhraseInput = document.getElementById('practice-phrase');
+        const waveformContainer = document.getElementById('waveform-container');
+        const generatePhraseBtn = document.getElementById('generate-phrase-btn');
+        const difficultyButtons = document.querySelectorAll('.difficulty-button');
+        const difficultyNotes = document.querySelectorAll('.difficulty-note');
+        const grammarAudioBtn = document.getElementById('grammar-audio-btn');
+        const generateNewBtn = document.getElementById('generate-new-btn');
+        const scrambledWordEl = document.getElementById('scrambled-word');
+        const wordGuessEl = document.getElementById('word-guess');
+        const wordRushFeedbackEl = document.getElementById('word-rush-feedback');
+        const wordRushMessageEl = document.getElementById('word-rush-message');
+        const streakCounter = document.getElementById('streak-counter');
+        
+        // Set App Version
+        const APP_VERSION = '1.3.2';
+        document.getElementById('app-version').textContent = APP_VERSION;
+        
+        // Event listeners
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const targetTab = button.dataset.tab;
@@ -531,6 +539,7 @@
                 button.classList.remove('text-gray-700', 'hover:text-indigo-600');
                 document.getElementById(targetTab).classList.add('active');
 
+                // Load content specific to the tab
                 if (targetTab === 'grammar') {
                     loadGrammarQuestion();
                 } else if (targetTab === 'word-rush') {
