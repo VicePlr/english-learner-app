@@ -17,6 +17,24 @@
         .tab-content.active {
             display: block;
         }
+        /* Waveform Animation */
+        .waveform-bar {
+            background-color: #6366f1;
+            width: 4px;
+            border-radius: 2px;
+            margin: 0 1px;
+            animation: pulse 1.2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scaleY(0.1); }
+            50% { transform: scaleY(1); }
+        }
+        .highlight {
+            background-color: #fde68a; /* Tailwind's yellow-200 */
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
@@ -38,6 +56,9 @@
                 </button>
                 <button data-tab="reading" class="tab-button px-4 py-2 text-sm md:text-base font-medium rounded-lg text-gray-700 hover:text-indigo-600 transition duration-300">
                     Reading
+                </button>
+                <button data-tab="word-rush" class="tab-button px-4 py-2 text-sm md:text-base font-medium rounded-lg text-gray-700 hover:text-indigo-600 transition duration-300">
+                    Word Rush
                 </button>
             </div>
         </nav>
@@ -69,21 +90,27 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Personalized Path Card -->
+                    <!-- Online Users Card -->
                     <div class="bg-gray-50 p-6 rounded-xl shadow-inner border border-gray-200">
-                        <h3 class="text-xl font-semibold text-indigo-600 mb-2">Your Path</h3>
-                        <p class="text-sm text-gray-600">Based on your activity, here are some recommended exercises.</p>
-                        <ul class="list-disc list-inside mt-4 space-y-1 text-gray-700 text-sm">
-                            <li>Focus on vowel sounds</li>
-                            <li>Practice simple past tense</li>
-                            <li>Read "The Little Prince"</li>
-                        </ul>
+                        <h3 class="text-xl font-semibold text-indigo-600 mb-2">App Status</h3>
+                        <p class="text-sm text-gray-600 mb-4">Current users and app version.</p>
+                        <div class="space-y-4">
+                            <div>
+                                <p class="text-2xl font-bold text-gray-800" id="online-users-counter">--</p>
+                                <p class="text-gray-500 text-sm mt-1">Online Users</p>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-800" id="app-version">--</p>
+                                <p class="text-gray-500 text-sm mt-1">App Version</p>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-4 break-all">User ID: <span id="user-id">--</span></p>
                     </div>
                     <!-- Gamified Exercises Card -->
                     <div class="bg-gray-50 p-6 rounded-xl shadow-inner border border-gray-200">
                         <h3 class="text-xl font-semibold text-indigo-600 mb-2">Gamified Drills</h3>
                         <p class="text-sm text-gray-600">Practice with engaging mini-games.</p>
-                        <button class="w-full mt-4 py-2 px-4 rounded-lg font-medium text-white bg-indigo-500 hover:bg-indigo-600 transition duration-300">
+                        <button data-tab="word-rush" class="tab-button w-full mt-4 py-2 px-4 rounded-lg font-medium text-white bg-indigo-500 hover:bg-indigo-600 transition duration-300">
                             Play "Word Rush"
                         </button>
                     </div>
@@ -94,18 +121,46 @@
             <section id="pronunciation" class="tab-content">
                 <h2 class="text-3xl font-bold text-gray-900 mb-4">Pronunciation Practice</h2>
                 <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
-                    <p class="text-sm text-gray-600 mb-4">Click the button and say the following phrase to practice your pronunciation:</p>
-                    <p class="text-xl md:text-2xl font-semibold text-gray-800 mb-6">"How are you doing today?"</p>
-                    <div class="flex items-center justify-center space-x-4">
+                    <p class="text-sm text-gray-600 mb-2">Enter a phrase to practice:</p>
+                    <input type="text" id="practice-phrase" value="How are you doing today?" class="w-full px-4 py-2 mb-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 transition duration-300">
+                    
+                    <div class="flex items-center justify-center space-x-4 mb-6">
+                        <button id="generate-phrase-btn" class="flex items-center justify-center px-6 py-3 bg-gray-500 text-white rounded-full hover:bg-gray-600 transition duration-300 focus:outline-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            <span>Generate New Phrase</span>
+                        </button>
+                        <button id="play-audio-btn" class="flex items-center justify-center px-6 py-3 bg-indigo-500 text-white rounded-full hover:bg-indigo-600 transition duration-300 focus:outline-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.125l-3.375 2.187-3.375-2.187 3.375-5.312 3.375 5.312zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Play Audio</span>
+                        </button>
                         <button id="record-btn" class="flex items-center justify-center px-6 py-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition duration-300 focus:outline-none">
-                           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a4 4 0 11-8 0 4 4 0 018 0z" />
-                           </svg>
-                           <span id="record-text">Start Speaking</span>
+                            </svg>
+                            <span id="record-text">Record My Voice</span>
                         </button>
                     </div>
+
+                    <!-- Simulated Waveform -->
+                    <div id="waveform-container" class="flex items-center justify-center w-full h-16 bg-white rounded-lg border border-gray-300 overflow-hidden hidden">
+                        <div class="waveform-bar" style="height: 10%;"></div>
+                        <div class="waveform-bar" style="height: 30%; animation-delay: 0.1s;"></div>
+                        <div class="waveform-bar" style="height: 60%; animation-delay: 0.2s;"></div>
+                        <div class="waveform-bar" style="height: 80%; animation-delay: 0.3s;"></div>
+                        <div class="waveform-bar" style="height: 100%; animation-delay: 0.4s;"></div>
+                        <div class="waveform-bar" style="height: 80%; animation-delay: 0.5s;"></div>
+                        <div class="waveform-bar" style="height: 60%; animation-delay: 0.6s;"></div>
+                        <div class="waveform-bar" style="height: 30%; animation-delay: 0.7s;"></div>
+                        <div class="waveform-bar" style="height: 10%; animation-delay: 0.8s;"></div>
+                    </div>
+
                     <div id="pronunciation-feedback" class="mt-6 p-4 rounded-lg text-gray-700 bg-white border border-gray-300">
                         <p id="result-text">Your feedback will appear here.</p>
+                        <p id="suggestion-text" class="mt-2 text-sm text-gray-500"></p>
                     </div>
                     <div id="browser-warning" class="mt-4 p-3 rounded-lg bg-yellow-100 text-yellow-800 text-sm hidden">
                         <p>Speech recognition is not fully supported in all browsers or environments. For best results, use Google Chrome.</p>
@@ -117,10 +172,29 @@
             <section id="grammar" class="tab-content">
                 <h2 class="text-3xl font-bold text-gray-900 mb-4">Grammar Drill</h2>
                 <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
-                    <p class="text-lg text-gray-800 mb-4" id="grammar-question"></p>
-                    <div id="grammar-options" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Options will be injected here -->
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex space-x-2">
+                            <button data-difficulty="beginner" class="difficulty-button active px-3 py-1 text-sm font-medium rounded-full bg-indigo-600 text-white transition duration-300">Beginner</button>
+                            <button data-difficulty="intermediate" class="difficulty-button px-3 py-1 text-sm font-medium rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition duration-300">Intermediate</button>
+                            <button data-difficulty="advanced" class="difficulty-button px-3 py-1 text-sm font-medium rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition duration-300">Advanced</button>
+                        </div>
+                        <div class="text-right">
+                             <p class="text-xl font-bold text-gray-800"><span id="grammar-points">0</span> Points</p>
+                        </div>
                     </div>
+                    <div class="flex items-center mb-4">
+                         <p class="text-lg text-gray-800 mr-2" id="grammar-question"></p>
+                         <button id="grammar-audio-btn" class="p-2 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition duration-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.5 7a.5.5 0 000 1h2a.5.5 0 000-1h-2zM15 9h-1a.5.5 0 000 1h1a.5.5 0 000-1zM14.5 11a.5.5 0 000 1h2a.5.5 0 000-1h-2z" clip-rule="evenodd" />
+                            </svg>
+                         </button>
+                    </div>
+
+                    <div id="grammar-options" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Options or input will be injected here -->
+                    </div>
+
                     <div class="mt-6 p-4 rounded-lg text-gray-700 bg-white border border-gray-300">
                         <p id="grammar-feedback">Select an option above to see feedback.</p>
                     </div>
@@ -140,14 +214,134 @@
                     </p>
                 </div>
             </section>
+            
+            <!-- Word Rush Section -->
+            <section id="word-rush" class="tab-content">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Word Rush</h2>
+                <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                    <p class="text-sm text-gray-600 mb-4">Unscramble the word to earn points!</p>
+                    <div class="flex flex-col items-center space-y-4">
+                        <p id="scrambled-word" class="text-4xl font-bold text-gray-800 tracking-widest">_ _ _ _ _</p>
+                        <input type="text" id="word-guess" placeholder="Your guess here" class="w-full max-w-sm px-4 py-2 text-center rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-300">
+                        <button id="check-word-btn" class="w-full max-w-sm py-2 px-4 rounded-lg font-medium text-white bg-indigo-500 hover:bg-indigo-600 transition duration-300">
+                            Check Answer
+                        </button>
+                    </div>
+                    <div id="word-rush-feedback" class="mt-6 p-4 rounded-lg text-gray-700 bg-white border border-gray-300">
+                        <p id="word-rush-message">Type your guess and click "Check Answer".</p>
+                    </div>
+                </div>
+            </section>
 
         </main>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, setDoc, serverTimestamp, collection, Timestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables provided by the environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // --- Firebase Initialization & Authentication ---
+        let db;
+        let auth;
+        let isAuthReady = false;
+
+        function initializeFirebase() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                // Set debug level for more detailed logs
+                setLogLevel('debug');
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        console.log("User authenticated:", user.uid);
+                        isAuthReady = true;
+                        document.getElementById('user-id').textContent = user.uid;
+                        trackOnlineStatus(user.uid);
+                    } else {
+                        console.log("No user signed in. Attempting anonymous sign-in...");
+                        isAuthReady = false;
+                        await signInAnonymously(auth);
+                    }
+                });
+
+                if (initialAuthToken) {
+                    signInWithCustomToken(auth, initialAuthToken).catch(err => {
+                        console.error("Custom token sign-in failed, falling back to anonymous:", err);
+                        signInAnonymously(auth);
+                    });
+                } else {
+                    signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+            }
+        }
+        
+        function trackOnlineStatus(uid) {
+            const onlineUsersRef = collection(db, `artifacts/${appId}/public/data/online_users`);
+            const userStatusRef = doc(onlineUsersRef, uid);
+
+            const updateStatus = async () => {
+                if (auth.currentUser) {
+                    try {
+                        console.log("Attempting to update user status for UID:", uid);
+                        await setDoc(userStatusRef, { last_seen: serverTimestamp() }, { merge: true });
+                        console.log("User status updated successfully.");
+                    } catch (e) {
+                        console.error("Failed to update user status:", e);
+                    }
+                } else {
+                    console.warn("User not authenticated, skipping status update.");
+                }
+            };
+            
+            // Initial call to update status
+            updateStatus();
+
+            // Set up interval to keep the status updated
+            setInterval(updateStatus, 30000);
+
+            // Listen for real-time changes in online users
+            onSnapshot(onlineUsersRef, (snapshot) => {
+                if (!isAuthReady) {
+                    console.log("Authentication not ready, skipping online users snapshot.");
+                    return;
+                }
+                const users = [];
+                const now = Timestamp.now().seconds;
+                const thirtySecondsAgo = now - 30; // Consider users online if they've pinged in the last 30 seconds
+
+                snapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    if (data.last_seen && data.last_seen.seconds > thirtySecondsAgo) {
+                        users.push(doc.id);
+                    }
+                });
+                document.getElementById('online-users-counter').textContent = users.length;
+            }, (error) => {
+                console.error("Error with online users snapshot listener:", error);
+            });
+        }
+        
+        // App Version
+        const APP_VERSION = '1.0.1';
+        document.getElementById('app-version').textContent = APP_VERSION;
+
+        // --- App Logic ---
+        
         // Check for Web Speech API support
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+        const synthesis = window.speechSynthesis;
 
         // UI Elements
         const tabButtons = document.querySelectorAll('.tab-button');
@@ -156,38 +350,116 @@
         const recordText = document.getElementById('record-text');
         const pronunciationFeedback = document.getElementById('pronunciation-feedback');
         const resultText = document.getElementById('result-text');
+        const suggestionText = document.getElementById('suggestion-text');
         const browserWarning = document.getElementById('browser-warning');
+        const wordRushButton = document.querySelector('[data-tab="word-rush"]');
+        const checkWordBtn = document.getElementById('check-word-btn');
+        const playAudioBtn = document.getElementById('play-audio-btn');
+        const practicePhraseInput = document.getElementById('practice-phrase');
+        const waveformContainer = document.getElementById('waveform-container');
+        const generatePhraseBtn = document.getElementById('generate-phrase-btn');
 
         const grammarQuestionEl = document.getElementById('grammar-question');
         const grammarOptionsEl = document.getElementById('grammar-options');
         const grammarFeedbackEl = document.getElementById('grammar-feedback');
+        const difficultyButtons = document.querySelectorAll('.difficulty-button');
+        const grammarAudioBtn = document.getElementById('grammar-audio-btn');
+        const grammarPointsEl = document.getElementById('grammar-points');
 
         const streakCounter = document.getElementById('streak-counter');
         const progressText = document.getElementById('progress-text');
         const progressCircle = document.querySelector('circle.text-green-500');
 
-        let streak = 0;
-        let progress = 0;
+        let streak = parseInt(localStorage.getItem('streak')) || 0;
+        let progress = parseInt(localStorage.getItem('progress')) || 0;
+        let lastCompletionDate = localStorage.getItem('lastCompletionDate') || null;
+        let grammarPoints = parseInt(localStorage.getItem('grammarPoints')) || 0;
+        let currentDifficulty = 'beginner';
+        let currentQuestion = null;
 
-        // Data for grammar drills
-        const grammarQuestions = [
-            {
-                question: "She _____ to the store yesterday.",
-                options: ["go", "goes", "went", "going"],
-                answer: "went"
-            },
-            {
-                question: "They _____ playing soccer right now.",
-                options: ["is", "are", "am", "be"],
-                answer: "are"
-            },
-            {
-                question: "I have _____ this movie before.",
-                options: ["see", "seen", "saw", "seeing"],
-                answer: "seen"
-            }
-        ];
-        let currentGrammarQuestionIndex = 0;
+        let currentWord = '';
+        const wordList = ["apple", "banana", "orange", "grape", "strawberry", "pineapple", "blueberry", "kiwi"];
+
+
+        // Data for grammar drills with new structure
+        const grammarQuestions = {
+            beginner: [
+                {
+                    type: "mc",
+                    question: "She _____ to the store yesterday.",
+                    options: ["go", "goes", "went", "going"],
+                    answer: "went",
+                    explanation: "We use 'went' because it is the past tense form of 'go'. 'Yesterday' indicates a past action."
+                },
+                {
+                    type: "mc",
+                    question: "They _____ playing soccer right now.",
+                    options: ["is", "are", "am", "be"],
+                    answer: "are",
+                    explanation: "The subject 'They' is plural, so we use the plural form of the verb 'to be', which is 'are'."
+                },
+                {
+                    type: "mc",
+                    question: "I have _____ this movie before.",
+                    options: ["see", "seen", "saw", "seeing"],
+                    answer: "seen",
+                    explanation: "For the present perfect tense (have/has + past participle), the past participle of 'see' is 'seen'."
+                },
+                {
+                    type: "mc",
+                    question: "He _____ driving to work right now.",
+                    options: ["is", "are", "am", "be"],
+                    answer: "is",
+                    explanation: "The subject 'He' is singular, so we use the singular form of the verb 'to be', which is 'is'. We use 'is driving' to describe an action happening right now."
+                }
+            ],
+            intermediate: [
+                {
+                    type: "mc",
+                    question: "If I _____ a bird, I would fly to the top of the world.",
+                    options: ["am", "was", "were", "had been"],
+                    answer: "were",
+                    explanation: "This is a second conditional sentence, which uses the subjunctive mood. For the hypothetical 'If I', we use 'were'."
+                },
+                {
+                    type: "mc",
+                    question: "The book _____ by a famous author.",
+                    options: ["is writing", "is written", "wrote", "writes"],
+                    answer: "is written",
+                    explanation: "This is the passive voice. The subject 'The book' receives the action, so we use the structure 'be verb + past participle'."
+                },
+                {
+                    type: "fill",
+                    question: "We were hiking for hours, but we finally made it to the summit. It was the most beautiful view I have ever seen. [fill] a reward for our hard work.",
+                    placeholder: "It felt like",
+                    answer: "It felt like",
+                    explanation: "The phrase 'It felt like' is used here to compare the experience to a reward, using a subjective feeling."
+                }
+            ],
+            advanced: [
+                {
+                    type: "mc",
+                    question: "The company's success is dependent _____ its innovative approach.",
+                    options: ["of", "on", "in", "with"],
+                    answer: "on",
+                    explanation: "The correct preposition to use with 'dependent' is 'on'. The phrase 'dependent on' means relying on something."
+                },
+                {
+                    type: "mc",
+                    question: "He is a very articulate speaker; _____ he sometimes struggles to get his point across.",
+                    options: ["besides", "furthermore", "nonetheless", "in addition"],
+                    answer: "nonetheless",
+                    explanation: "We use 'nonetheless' to introduce a statement that contrasts with what has just been said, but is true despite it."
+                },
+                {
+                    type: "fill",
+                    question: "I wish I _____ studied harder for the exam.",
+                    placeholder: "had",
+                    answer: "had",
+                    explanation: "We use 'had' in this context to express a past regret. The structure 'I wish I had + past participle' is used to talk about things we wish we had done differently in the past."
+                }
+            ]
+        };
 
         // --- Core App Logic ---
 
@@ -213,123 +485,352 @@
                 // Load content for the active tab if needed
                 if (targetTab === 'grammar') {
                     loadGrammarQuestion();
+                } else if (targetTab === 'word-rush') {
+                    loadWordRushGame();
                 }
             });
         });
 
         // --- Pronunciation Section Logic ---
-        if (recognition) {
+        if (recognition && synthesis) {
             recognition.continuous = false;
             recognition.lang = 'en-US';
             recognition.interimResults = false;
             recognition.maxAlternatives = 1;
+            
+            generatePhraseBtn.addEventListener('click', generateNewPhrase);
+
+            playAudioBtn.addEventListener('click', () => {
+                const textToSpeak = practicePhraseInput.value;
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                utterance.lang = 'en-US';
+                synthesis.speak(utterance);
+            });
 
             recordBtn.addEventListener('click', () => {
-                if (recordText.textContent === 'Start Speaking') {
+                if (recordText.textContent === 'Record My Voice') {
                     recordText.textContent = 'Listening...';
                     recordBtn.classList.remove('bg-red-500');
                     recordBtn.classList.add('bg-blue-500');
                     resultText.textContent = 'Listening...';
+                    suggestionText.textContent = '';
+                    waveformContainer.classList.remove('hidden');
                     recognition.start();
                 } else {
-                    recordText.textContent = 'Start Speaking';
+                    recordText.textContent = 'Record My Voice';
                     recordBtn.classList.remove('bg-blue-500');
                     recordBtn.classList.add('bg-red-500');
+                    waveformContainer.classList.add('hidden');
                     recognition.stop();
                 }
             });
 
             recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                resultText.textContent = `You said: "${transcript}".`;
+                const transcript = event.results[0][0].transcript.toLowerCase();
+                const targetPhrase = practicePhraseInput.value.toLowerCase();
+                
+                const { score, feedback, suggestion } = analyzePronunciation(transcript, targetPhrase);
+                
+                resultText.innerHTML = feedback;
+                suggestionText.textContent = suggestion;
 
-                // Simple feedback based on a target phrase
-                const targetPhrase = "How are you doing today?";
-                const similarity = calculateSimilarity(transcript, targetPhrase);
-
-                if (similarity > 0.8) {
-                    resultText.textContent += " Great job! Your pronunciation is clear and accurate.";
-                } else if (similarity > 0.5) {
-                    resultText.textContent += " Good attempt! Practice a little more to improve clarity.";
+                if (score > 80) {
+                    resultText.innerHTML += ` Your score is ${score}%. Great job! Your pronunciation is clear and accurate.`;
+                    updateProgress();
+                } else if (score > 50) {
+                    resultText.innerHTML += ` Your score is ${score}%. Good attempt! Practice a little more to improve clarity.`;
                 } else {
-                    resultText.textContent += " Keep trying! Your pronunciation needs more work.";
+                    resultText.innerHTML += ` Your score is ${score}%. Keep trying! Your pronunciation needs more work.`;
                 }
 
-                recordText.textContent = 'Start Speaking';
+                recordText.textContent = 'Record My Voice';
                 recordBtn.classList.remove('bg-blue-500');
                 recordBtn.classList.add('bg-red-500');
-                updateProgress();
+                waveformContainer.classList.add('hidden');
             };
 
             recognition.onerror = (event) => {
                 resultText.textContent = `Error occurred in speech recognition: ${event.error}`;
-                recordText.textContent = 'Start Speaking';
+                suggestionText.textContent = '';
+                recordText.textContent = 'Record My Voice';
                 recordBtn.classList.remove('bg-blue-500');
                 recordBtn.classList.add('bg-red-500');
+                waveformContainer.classList.add('hidden');
             };
 
-            // Basic similarity check (could be more advanced)
-            function calculateSimilarity(str1, str2) {
-                const words1 = str1.toLowerCase().split(/\s+/);
-                const words2 = str2.toLowerCase().split(/\s+/);
-                let intersection = words1.filter(word => words2.includes(word)).length;
-                return intersection / Math.max(words1.length, words2.length);
+            // Enhanced analysis function (simulated for demonstration)
+            function analyzePronunciation(transcript, targetPhrase) {
+                const transcriptWords = transcript.split(/\s+/).filter(word => word);
+                const targetWords = targetPhrase.split(/\s+/).filter(word => word);
+                
+                let correctCount = 0;
+                let feedbackHtml = `You said: "`;
+                let suggestionText = '';
+                let isMispronounced = false;
+
+                // This is a simple, simulated check. In a real app, this would require a more
+                // advanced NLP model or a service that returns phoneme-level data.
+                for (let i = 0; i < targetWords.length; i++) {
+                    const targetWord = targetWords[i];
+                    const spokenWord = transcriptWords[i] || '';
+                    
+                    if (spokenWord === targetWord) {
+                        feedbackHtml += `<span>${spokenWord}</span> `;
+                        correctCount++;
+                    } else if (!isMispronounced) {
+                        // This is the first mispronounced word we've "identified"
+                        feedbackHtml += `<span class="highlight">${spokenWord || targetWord}</span> `;
+                        
+                        // Simple, hard-coded suggestions based on the first word
+                        switch(targetWord) {
+                            case 'how': suggestionText = "Suggestion: Remember the 'ow' sound, like in 'cow'."; break;
+                            case 'doing': suggestionText = "Suggestion: Focus on the '-ing' ending sound."; break;
+                            case 'today': suggestionText = "Suggestion: Emphasize the second syllable 'day'."; break;
+                            case 'great': suggestionText = "Suggestion: Make sure to clearly pronounce the 'r' sound."; break;
+                            default: suggestionText = "Suggestion: Try to enunciate this word more clearly.";
+                        }
+                        isMispronounced = true;
+                    } else {
+                         feedbackHtml += `<span>${spokenWord}</span> `;
+                    }
+                }
+                
+                feedbackHtml += `"`;
+
+                const similarity = correctCount / targetWords.length;
+                const score = Math.floor(similarity * 100);
+
+                return { score, feedback: feedbackHtml, suggestion: suggestionText };
+            }
+
+            async function generateNewPhrase() {
+                generatePhraseBtn.disabled = true;
+                const originalText = generatePhraseBtn.textContent;
+                generatePhraseBtn.innerHTML = `
+                    <svg class="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Generating...</span>
+                `;
+                
+                const userQuery = "Generate a single, short, grammatically correct English phrase for a learner to practice pronunciation. The phrase should be natural-sounding and not a common idiom. Return only the phrase itself.";
+                
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                };
+                
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                let retries = 0;
+                const maxRetries = 3;
+                let delay = 1000;
+
+                while (retries < maxRetries) {
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                             if (response.status === 429) {
+                                throw new Error('Rate limit exceeded');
+                            }
+                            throw new Error('Network response was not ok');
+                        }
+
+                        const result = await response.json();
+                        const generatedText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                        
+                        if (generatedText) {
+                            practicePhraseInput.value = generatedText.trim();
+                            resultText.textContent = "New phrase generated! Press 'Play Audio' to listen or 'Record My Voice' to practice.";
+                            suggestionText.textContent = '';
+                            break; // Exit the loop on success
+                        }
+
+                    } catch (error) {
+                        retries++;
+                        if (retries < maxRetries) {
+                            await new Promise(res => setTimeout(res, delay));
+                            delay *= 2; // Exponential backoff
+                        } else {
+                            resultText.textContent = `Failed to generate a new phrase: ${error.message}`;
+                            suggestionText.textContent = '';
+                        }
+                    }
+                }
+                
+                generatePhraseBtn.disabled = false;
+                generatePhraseBtn.innerHTML = originalText;
             }
 
         } else {
             // If API is not supported
             recordBtn.disabled = true;
             recordBtn.textContent = 'Not Supported';
+            playAudioBtn.disabled = true;
+            playAudioBtn.textContent = 'Not Supported';
+            generatePhraseBtn.disabled = true;
+            generatePhraseBtn.textContent = 'Not Supported';
             browserWarning.classList.remove('hidden');
         }
 
         // --- Grammar Section Logic ---
         function loadGrammarQuestion() {
-            const currentQuestion = grammarQuestions[currentGrammarQuestionIndex];
-            grammarQuestionEl.textContent = currentQuestion.question;
+            const questions = grammarQuestions[currentDifficulty];
+            const randomIndex = Math.floor(Math.random() * questions.length);
+            currentQuestion = questions[randomIndex];
+
+            grammarQuestionEl.innerHTML = currentQuestion.question;
             grammarOptionsEl.innerHTML = '';
             grammarFeedbackEl.textContent = 'Select an option above to see feedback.';
+            grammarFeedbackEl.classList.remove('text-green-600', 'text-red-600');
 
-            currentQuestion.options.forEach(option => {
-                const button = document.createElement('button');
-                button.textContent = option;
-                button.classList.add('p-3', 'rounded-lg', 'font-medium', 'text-gray-700', 'bg-white', 'border', 'border-gray-300', 'hover:bg-indigo-50', 'transition', 'duration-300');
-                button.addEventListener('click', () => checkGrammarAnswer(option));
-                grammarOptionsEl.appendChild(button);
-            });
+            if (currentQuestion.type === 'mc') {
+                currentQuestion.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.textContent = option;
+                    button.classList.add('p-3', 'rounded-lg', 'font-medium', 'text-gray-700', 'bg-white', 'border', 'border-gray-300', 'hover:bg-indigo-50', 'transition', 'duration-300');
+                    button.addEventListener('click', () => checkGrammarAnswer(option));
+                    grammarOptionsEl.appendChild(button);
+                });
+            } else if (currentQuestion.type === 'fill') {
+                 // Replace placeholder text with input field
+                const questionParts = currentQuestion.question.split(`[fill]`);
+                grammarQuestionEl.innerHTML = `${questionParts[0]}<input type="text" id="fill-in-blank" placeholder="${currentQuestion.placeholder}" class="w-32 px-2 py-1 mx-1 rounded-md border border-gray-300"> ${questionParts[1]}`;
+                
+                const checkBtn = document.createElement('button');
+                checkBtn.textContent = 'Check Answer';
+                checkBtn.classList.add('w-full', 'py-2', 'px-4', 'rounded-lg', 'font-medium', 'text-white', 'bg-indigo-500', 'hover:bg-indigo-600', 'transition', 'duration-300', 'mt-4');
+                checkBtn.addEventListener('click', () => {
+                    const input = document.getElementById('fill-in-blank').value.trim();
+                    checkGrammarAnswer(input);
+                });
+                grammarOptionsEl.appendChild(checkBtn);
+            }
         }
 
-        function checkGrammarAnswer(selectedOption) {
-            const currentQuestion = grammarQuestions[currentGrammarQuestionIndex];
-            if (selectedOption === currentQuestion.answer) {
-                grammarFeedbackEl.textContent = "Correct! Great job.";
+        function checkGrammarAnswer(selectedAnswer) {
+            const isCorrect = selectedAnswer.toLowerCase() === currentQuestion.answer.toLowerCase();
+
+            if (isCorrect) {
+                grammarFeedbackEl.textContent = `✔️ Correct! ` + currentQuestion.explanation;
                 grammarFeedbackEl.classList.remove('text-red-600');
                 grammarFeedbackEl.classList.add('text-green-600');
+                grammarPoints += 10;
+                localStorage.setItem('grammarPoints', grammarPoints);
+                grammarPointsEl.textContent = grammarPoints;
                 updateProgress();
             } else {
-                grammarFeedbackEl.textContent = `Incorrect. The correct answer is "${currentQuestion.answer}".`;
+                grammarFeedbackEl.textContent = `❌ Incorrect. The correct answer is "${currentQuestion.answer}". ` + currentQuestion.explanation;
                 grammarFeedbackEl.classList.remove('text-green-600');
                 grammarFeedbackEl.classList.add('text-red-600');
             }
             
-            // Move to the next question or loop
-            currentGrammarQuestionIndex = (currentGrammarQuestionIndex + 1) % grammarQuestions.length;
-            setTimeout(loadGrammarQuestion, 1500); // Load next question after a delay
+            // Disable all buttons after an answer is selected
+            const optionButtons = grammarOptionsEl.querySelectorAll('button');
+            optionButtons.forEach(btn => btn.disabled = true);
+
+            // Add a next question button
+            const nextButton = document.createElement('button');
+            nextButton.textContent = 'Next Question';
+            nextButton.classList.add('w-full', 'mt-4', 'py-2', 'px-4', 'rounded-lg', 'font-medium', 'text-white', 'bg-indigo-500', 'hover:bg-indigo-600', 'transition', 'duration-300');
+            nextButton.addEventListener('click', loadGrammarQuestion);
+            grammarOptionsEl.appendChild(nextButton);
         }
 
+        // Difficulty level selection
+        difficultyButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const newDifficulty = button.dataset.difficulty;
+                currentDifficulty = newDifficulty;
+
+                difficultyButtons.forEach(btn => {
+                    btn.classList.remove('bg-indigo-600', 'text-white');
+                    btn.classList.add('bg-gray-200', 'text-gray-700');
+                });
+                button.classList.remove('bg-gray-200', 'text-gray-700');
+                button.classList.add('bg-indigo-600', 'text-white');
+                
+                loadGrammarQuestion();
+            });
+        });
+
+        // TTS for grammar questions
+        grammarAudioBtn.addEventListener('click', () => {
+            if (currentQuestion) {
+                // Remove the fill-in-the-blank placeholder for a smoother reading
+                const textToSpeak = currentQuestion.question.replace('[fill]', '');
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                utterance.lang = 'en-US';
+                synthesis.speak(utterance);
+            }
+        });
+
+
+        // --- Word Rush Logic ---
+        function scrambleWord(word) {
+            return word.split('').sort(() => 0.5 - Math.random()).join('');
+        }
+
+        function loadWordRushGame() {
+            currentWord = wordList[Math.floor(Math.random() * wordList.length)];
+            const scrambled = scrambleWord(currentWord);
+            document.getElementById('scrambled-word').textContent = scrambled.toUpperCase();
+            document.getElementById('word-guess').value = '';
+            document.getElementById('word-rush-message').textContent = 'Type your guess and click "Check Answer".';
+            document.getElementById('word-rush-message').classList.remove('text-red-600', 'text-green-600');
+        }
+
+        checkWordBtn.addEventListener('click', () => {
+            const guess = document.getElementById('word-guess').value.toLowerCase();
+            const messageEl = document.getElementById('word-rush-message');
+
+            if (guess === currentWord) {
+                messageEl.textContent = "Correct! You got it!";
+                messageEl.classList.remove('text-red-600');
+                messageEl.classList.add('text-green-600');
+                updateProgress();
+                setTimeout(loadWordRushGame, 1500);
+            } else {
+                messageEl.textContent = "Incorrect. Try again!";
+                messageEl.classList.remove('text-green-600');
+                messageEl.classList.add('text-red-600');
+            }
+        });
+
+
         // --- Dashboard & Gamification Logic ---
-        function updateProgress() {
-            streak++;
-            progress = Math.min(100, progress + 10); // Example: 10% progress per correct action
+        function updateDashboardUI() {
             streakCounter.textContent = streak;
             progressText.textContent = `${progress}%`;
             progressCircle.style.setProperty('--progress', progress);
         }
 
+        function updateProgress() {
+            const today = new Date().toLocaleDateString();
+            if (lastCompletionDate !== today) {
+                streak++;
+                lastCompletionDate = today;
+                localStorage.setItem('streak', streak);
+                localStorage.setItem('lastCompletionDate', today);
+            }
+            progress = Math.min(100, progress + 10);
+            localStorage.setItem('progress', progress);
+            updateDashboardUI();
+        }
+
         // Initial load
         window.onload = () => {
+            initializeFirebase();
+            updateDashboardUI();
             loadGrammarQuestion();
-            // Optional: Start a fun initial animation or message.
+            loadWordRushGame();
+            grammarPointsEl.textContent = grammarPoints;
         };
 
     </script>
