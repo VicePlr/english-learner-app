@@ -49,10 +49,8 @@
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-4">
 
-    <!-- Main Application Container -->
     <div class="bg-white rounded-xl shadow-lg w-full max-w-4xl overflow-hidden mb-4">
         
-        <!-- Navigation Tabs -->
         <nav class="bg-gray-100 p-4 border-b border-gray-200">
             <div class="flex justify-between items-center space-x-2">
                 <button data-tab="dashboard" class="tab-button active px-4 py-2 text-sm md:text-base font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 transition duration-300">
@@ -73,14 +71,11 @@
             </div>
         </nav>
 
-        <!-- Tab Content Sections -->
         <main class="p-6 md:p-8">
 
-            <!-- Dashboard Section -->
             <section id="dashboard" class="tab-content active">
                 <h2 class="text-3xl font-bold text-gray-900 mb-4">Welcome Back!</h2>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Progress Card -->
                     <div class="bg-gray-50 p-6 rounded-xl shadow-inner border border-gray-200">
                         <h3 class="text-xl font-semibold text-indigo-600 mb-2">My Progress</h3>
                         <p class="text-sm text-gray-600 mb-4">Track your daily progress and achievements.</p>
@@ -100,7 +95,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Gamified Exercises Card -->
                     <div class="bg-gray-50 p-6 rounded-xl shadow-inner border border-gray-200">
                         <h3 class="text-xl font-semibold text-indigo-600 mb-2">Gamified Drills</h3>
                         <p class="text-sm text-gray-600">Practice with engaging mini-games.</p>
@@ -111,7 +105,6 @@
                 </div>
             </section>
 
-            <!-- Pronunciation Section -->
             <section id="pronunciation" class="tab-content">
                 <h2 class="text-3xl font-bold text-gray-900 mb-4">Pronunciation Practice</h2>
                 <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
@@ -139,7 +132,6 @@
                         </button>
                     </div>
 
-                    <!-- Simulated Waveform -->
                     <div id="waveform-container" class="flex items-center justify-center w-full h-16 bg-white rounded-lg border border-gray-300 overflow-hidden hidden">
                         <div class="waveform-bar" style="height: 10%;"></div>
                         <div class="waveform-bar" style="height: 30%; animation-delay: 0.1s;"></div>
@@ -162,11 +154,9 @@
                 </div>
             </section>
 
-            <!-- Grammar Section -->
             <section id="grammar" class="tab-content">
                 <h2 class="text-3xl font-bold text-gray-900 mb-4">Grammar Drill</h2>
                 
-                <!-- Difficulty Notes -->
                 <div data-difficulty-note="beginner" class="difficulty-note active bg-indigo-100 text-indigo-800 p-4 rounded-lg mb-4 text-sm font-medium">
                     <p>
                         ⭐ **Beginner Level:** You'll practice foundational grammar skills, focusing on simple tenses (present, past, future), subject-verb agreement, and basic sentence structure.
@@ -184,7 +174,6 @@
                 </div>
 
                 <div class="flex flex-col md:flex-row md:items-center justify-between mb-4">
-                    <!-- Difficulty and Points -->
                     <div class="flex items-center space-x-4 mb-4 md:mb-0">
                         <div class="flex space-x-2">
                             <button data-difficulty="beginner" class="difficulty-button active px-3 py-1 text-sm font-medium rounded-full bg-indigo-600 text-white transition duration-300">Beginner</button>
@@ -193,7 +182,6 @@
                         </div>
                     </div>
 
-                    <!-- Navigation Buttons -->
                     <div class="flex space-x-2">
                          <button id="generate-new-btn" class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-indigo-500 hover:bg-indigo-600 transition duration-300">
                             New Question
@@ -211,8 +199,7 @@
                 </div>
 
                 <div id="grammar-options" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Options or input will be injected here -->
-                </div>
+                    </div>
 
                 <div class="mt-6 p-4 rounded-lg text-gray-700 bg-white border border-gray-300">
                     <p id="grammar-feedback">Select an option above to see feedback.</p>
@@ -220,7 +207,6 @@
             </div>
         </section>
 
-        <!-- Reading Section -->
         <section id="reading" class="tab-content">
             <h2 class="text-3xl font-bold text-gray-900 mb-4">Reading Materials</h2>
             <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 overflow-y-auto max-h-[500px]">
@@ -234,7 +220,6 @@
             </div>
         </section>
         
-        <!-- Word Rush Section -->
         <section id="word-rush" class="tab-content">
             <h2 class="text-3xl font-bold text-gray-900 mb-4">Word Rush</h2>
             <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
@@ -255,7 +240,6 @@
     </main>
 </div>
 
-<!-- App Version Footer -->
 <div class="mt-4 text-center text-gray-400 text-sm">
     <p>Version <span id="app-version"></span></p>
 </div>
